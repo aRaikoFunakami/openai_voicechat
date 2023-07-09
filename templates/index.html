@@ -13,18 +13,12 @@
 </head>
 
 <body>
-	<!-- please get a video from  https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.720p.webm -->
-	<video id="video" src="http://127.0.0.1:8001/media/background_carnavi.mp4" autoplay loop muted></video>
-
-	<!-- 
-            ずんだもんのイラスト https://zunko.jp/con_illust.html 
-            VOICEVOX:ずんだもん
-    -->
+	<video id="video" src='' autoplay loop muted></video>
 	<div id="setting">
-		<img id="settingImage" src="http://127.0.0.1:8001/media/icon_setting.png">
+		<img id="settingImage" src="">
 	</div>
 	<div id="answer">
-		<img id="characterImage" src="http://127.0.0.1:8001/media/zunmon.png">
+		<img id="characterImage" src="">
 		<div id="answer_text"></div>
 	</div>
 	<div id="container">
@@ -35,50 +29,27 @@
 	<div id="overlay"></div>
 	<div id="modal">
 		<h2>Settings</h2>
-		<label for="language" class="ios-label">Language:</label>
-		<select id="language" class="ios-select">
-			<option value="ja-JP">Japanese</option>
-			<option value="en-US">English</option>
-			<option value="zh-CN">Chinese</option>
-		</select>
-		<label for="background" class="ios-label">Background:</label>
-		<select id="background" class="ios-select">
-			<option value="http://127.0.0.1:8001/media/background_carnavi.mp4">CarNavi Mapbox</option>
-			<option value="http://127.0.0.1:8001/media/background_lexus_navi.mp4">CarNavi Lexus</option>
-			<option value="http://127.0.0.1:8001/media/background_bigbuckbunny.webm">TV big buck bunny</option>
-			<option value="http://127.0.0.1:8001/media/background_soccer.mp4">TV soccer</option>
-		</select>
-
+		<p>
+			<label for="language" class="ios-label">Language:</label>
+			<select id="language" class="ios-select">
+				<option value="ja-JP">Japanese</option>
+				<option value="en-US">English</option>
+				<option value="zh-CN">Chinese</option>
+			</select>
+		</p>
+		<p>
+			<label for="background" class="ios-label">Background:</label>
+			<select id="background" class="ios-select">
+				<option value="">Select Background</option>
+			</select>
+		</p>
 		<button id="saveButton" class="ios-button">Save</button>
 		<button id="cancelButton" class="ios-button">Cancel</button>
 	</div>
-
-
-	<script>
-		var videoUrls = [
-			"http://127.0.0.1:8001/media/background_carnavi.mp4",
-			"http://127.0.0.1:8001/media/background_lexus_navi.mp4",
-			"http://127.0.0.1:8001/media/background_bigbuckbunny.webm",
-			"http://127.0.0.1:8001/media/background_soccer.mp4",
-			//... more URLs if needed
-		];
-		var videoTimes = new Array(videoUrls.length).fill(0);
-		var currentVideoIndex = 0;
-		document.addEventListener('keydown', function (event) {
-			if (event.keyCode >= 49 && event.keyCode <= 57) {
-				var videoIndex = event.keyCode - 49; // 49 is the keyCode for '1'
-				if (videoUrls[videoIndex] !== undefined) {
-					var videoElement = document.getElementById('video');
-					videoTimes[currentVideoIndex] = videoElement.currentTime;
-					videoElement.src = videoUrls[videoIndex];
-					videoElement.currentTime = videoTimes[videoIndex];
-					videoElement.play();
-					currentVideoIndex = videoIndex;
-				}
-			}
-		});
-	</script>
-
 </body>
 
 </html>
+<!-- 
+            ずんだもんのイラスト https://zunko.jp/con_illust.html 
+            VOICEVOX:ずんだもん
+-->

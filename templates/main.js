@@ -3,6 +3,26 @@
 function init_html() {
 	const microphone = document.getElementById("microphone");
 	microphone.style.backgroundImage = resources.microphoneImage;
+
+	const videoElement = document.getElementById('video');
+	const newSource = resources.videoUrls[0];
+	videoElement.setAttribute('src', newSource);
+
+	const settingImageElement = document.getElementById('settingImage');
+	const settingImageSrc = resources.settingImage;
+	settingImageElement.setAttribute('src', settingImageSrc);
+
+	const characterImageElement = document.getElementById('characterImage');
+	const characterImageSrc = resources.characterImage;
+	characterImageElement.setAttribute('src', characterImageSrc);
+
+	const backgroundSelect = document.getElementById('background');
+	for (var i = 0; i < resources.videoUrls.length; i++) {
+		var option = document.createElement('option');
+		option.value = resources.videoUrls[i];
+		option.text = 'Background ' + (i + 1);
+		backgroundSelect.appendChild(option);
+	}
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -29,7 +49,40 @@ document.addEventListener("DOMContentLoaded", function () {
 		}, displayTime * 1000);
 	}
 
-	// change language
+	//
+	// same as e.code === 'Space'
+	//
+	const microphone = document.getElementById('microphone');
+	microphone.addEventListener('click', function () {
+		// cCancel if the process is in progress.
+		if (networkHandler.isProcessing || speechRecognitionHandler.isProcessing) {
+			networkHandler.cancelAllConnections();
+			speechRecognitionHandler.stopProcessing();
+			return;
+		}
+		speechRecognitionHandler.startProcessing(lang);
+	});
+
+	//
+	// Setting by Keys
+	//
+	let videoTimes = new Array(resources.videoUrls.length).fill(0);
+	let currentVideoIndex = 0;
+	// background
+	window.addEventListener('keypress', function (event) {
+		if (event.keyCode >= 49 && event.keyCode <= 57) {
+			var videoIndex = event.keyCode - 49; // 49 is the keyCode for '1'
+			if (resources.videoUrls[videoIndex] !== undefined) {
+				var videoElement = document.getElementById('video');
+				videoTimes[currentVideoIndex] = videoElement.currentTime;
+				videoElement.src = resources.videoUrls[videoIndex];
+				videoElement.currentTime = videoTimes[videoIndex];
+				videoElement.play();
+				currentVideoIndex = videoIndex;
+			}
+		}
+	});
+	// language
 	window.addEventListener('keypress', (e) => {
 		if (e.code === 'Space') {
 			// cCancel if the process is in progress.
@@ -55,17 +108,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	});
 
-	const microphone = document.getElementById('microphone');
-	microphone.addEventListener('click', function () {
-		// cCancel if the process is in progress.
-		if (networkHandler.isProcessing || speechRecognitionHandler.isProcessing) {
-			networkHandler.cancelAllConnections();
-			speechRecognitionHandler.stopProcessing();
-			return;
-		}
-		speechRecognitionHandler.startProcessing(lang);
-	});
-
+	//
+	// Setting Dialog
+	//
 	const settingsButton = document.getElementById('settingImage');
 	const overlay = document.getElementById('overlay');
 	const modal = document.getElementById('modal');
@@ -80,16 +125,21 @@ document.addEventListener("DOMContentLoaded", function () {
 	saveButton.addEventListener('click', function () {
 		const languageSelect = document.getElementById('language');
 		const backgroundSelect = document.getElementById('background');
-
 		const selectedLanguage = languageSelect.value;
 		const selectedBackground = backgroundSelect.value;
-
-		var videoElement = document.getElementById('video');
-		videoElement.src = selectedBackground;
-		videoElement.play();
+		// background
+		let videoIndex = backgroundSelect.selectedIndex - 1;
+		if (resources.videoUrls[videoIndex] !== undefined) {
+			var videoElement = document.getElementById('video');
+			videoTimes[currentVideoIndex] = videoElement.currentTime;
+			videoElement.src = selectedBackground
+			videoElement.currentTime = videoTimes[videoIndex];
+			videoElement.play();
+			currentVideoIndex = videoIndex;
+		}
+		// language
 		lang = selectedLanguage;
-
-		updateStatus (`lang:${lang}`, 3);
+		updateStatus(`lang:${lang}`, 3);
 		closeModal();
 	});
 
@@ -102,6 +152,10 @@ document.addEventListener("DOMContentLoaded", function () {
 		modal.style.display = 'none';
 	}
 
+	//
+	// Handers
+	//
+
 	// Cancels processing other than speech recognition, network processing, voice playback processing, etc.
 	speechRecognitionHandler.canceledHandler = function () {
 		console.log('speechRecognitionHandler.cancelHandler');
@@ -112,6 +166,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		console.log('speechRecognitionHandler.recognizedHandler ');
 		networkHandler.setupEventSource(text, lang);
 	}
-
-
 });
+
+
