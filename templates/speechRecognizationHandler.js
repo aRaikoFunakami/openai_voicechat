@@ -97,7 +97,7 @@ class SpeechRecognitionHandler {
 			console.log("Cancel Speech Recognition");
 			this.recognizedText = "";
 			this.recognition.stop();
-			this.updateStatusHandler("Cancel Speech Recognition.", 1);
+			this.updateStatusHandler("Cancel...", 1);
 			this.canceledHandler();
 			this.isProcessing = false;
 			return;

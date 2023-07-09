@@ -1,6 +1,6 @@
 // main.js
 
-function init_html(){
+function init_html() {
 	const microphone = document.getElementById("microphone");
 	microphone.style.backgroundImage = resources.microphoneImage;
 }
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	window.addEventListener('keypress', (e) => {
 		if (e.code === 'Space') {
 			// cCancel if the process is in progress.
-			if(networkHandler.isProcessing || speechRecognitionHandler.isProcessing){
+			if (networkHandler.isProcessing || speechRecognitionHandler.isProcessing) {
 				networkHandler.cancelAllConnections();
 				speechRecognitionHandler.stopProcessing();
 				return;
@@ -55,16 +55,63 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	});
 
+	const microphone = document.getElementById('microphone');
+	microphone.addEventListener('click', function () {
+		// cCancel if the process is in progress.
+		if (networkHandler.isProcessing || speechRecognitionHandler.isProcessing) {
+			networkHandler.cancelAllConnections();
+			speechRecognitionHandler.stopProcessing();
+			return;
+		}
+		speechRecognitionHandler.startProcessing(lang);
+	});
+
+	const settingsButton = document.getElementById('settingImage');
+	const overlay = document.getElementById('overlay');
+	const modal = document.getElementById('modal');
+	const saveButton = document.getElementById('saveButton');
+	const cancelButton = document.getElementById('cancelButton');
+
+	settingsButton.addEventListener('click', function () {
+		overlay.style.display = 'block';
+		modal.style.display = 'block';
+	});
+
+	saveButton.addEventListener('click', function () {
+		const languageSelect = document.getElementById('language');
+		const backgroundSelect = document.getElementById('background');
+
+		const selectedLanguage = languageSelect.value;
+		const selectedBackground = backgroundSelect.value;
+
+		var videoElement = document.getElementById('video');
+		videoElement.src = selectedBackground;
+		videoElement.play();
+		lang = selectedLanguage;
+
+		updateStatus (`lang:${lang}`, 3);
+		closeModal();
+	});
+
+	cancelButton.addEventListener('click', function () {
+		closeModal();
+	});
+
+	function closeModal() {
+		overlay.style.display = 'none';
+		modal.style.display = 'none';
+	}
+
 	// Cancels processing other than speech recognition, network processing, voice playback processing, etc.
-	speechRecognitionHandler.canceledHandler = function(){
+	speechRecognitionHandler.canceledHandler = function () {
 		console.log('speechRecognitionHandler.cancelHandler');
 		networkHandler.cancelAllConnections();
 	}
 
-	speechRecognitionHandler.recognizedHandler = function(text){
+	speechRecognitionHandler.recognizedHandler = function (text) {
 		console.log('speechRecognitionHandler.recognizedHandler ');
 		networkHandler.setupEventSource(text, lang);
 	}
 
-	
+
 });
