@@ -78,6 +78,7 @@ class VoiceVoxPlayer {
 							console.log(`audio.onended ${this.audioEndedHandler}, ${textData}`);
 							if (this.audioGenerationQueue.length === 0) {
 								const e = {
+									isStop: true,
 									text: textData
 								};
 								if (this.audioEndedHandler) {

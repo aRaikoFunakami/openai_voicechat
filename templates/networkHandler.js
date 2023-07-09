@@ -10,6 +10,8 @@ class NetworkHandler {
 
 		//handlers
 		this.updateStatusHandler = null;
+		this.updateAnswerHandler = null;
+		this.speechEndHandler = null;
 	}
 
 	cancelAllConnections() {
@@ -38,6 +40,7 @@ class NetworkHandler {
 			this.updateStatusHandler(text, 1);
 			return;
 		}
+		this.updateAnswerHandler(text, false);
 		//else {
 		// ストリームで受け取ったデータを徐々に表示する
 		//answer.style.display = 'flex';
@@ -48,16 +51,20 @@ class NetworkHandler {
 
 		if (this.lang == 'ja-JP') {
 			this.speechHandlerZundamon.speak(text, finish === "stop", this.lang);
-			this.speechHandlerZundamon.handleSpeechEnd = (isStop) => {
+			this.speechHandlerZundamon.speechEndHandler = function(isStop) {
 				this.isProcessing = !isStop;
-			};
+				this.speechEndHandler('', isStop);
+			}.bind(this);
 		}
 		else {
 			this.speechHandler.speak(text, finish === "stop", this.lang);
-			this.speechHandler.handleSpeechEnd = (isStop) => {
+			this.speechHandler.speechEndHandler = function(isStop) {
 				this.isProcessing = !isStop;
-			};
+				this.speechEndHandler('', isStop);
+			}.bind(this);
 		}
+
+
 	}
 
 	handleEventSourceError(event) {

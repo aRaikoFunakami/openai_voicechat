@@ -43,8 +43,9 @@ class SpeechHandler {
 
 	handleSpeechEnd(event) {
 		const utterance = event.target;
+		const text = utterance.text;
 		const isStop = utterance.isStop;
-		console.log(`utterance.finish: ${isStop}`);
+		console.log(`utterance.finish: ${text}, ${isStop}`);
 
 		this.speechEndHandler(isStop);
 	}

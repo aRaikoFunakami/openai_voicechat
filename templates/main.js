@@ -13,7 +13,7 @@ function init_html() {
 	settingImageElement.setAttribute('src', settingImageSrc);
 
 	const characterImageElement = document.getElementById('characterImage');
-	const characterImageSrc = resources.characterImage;
+	const characterImageSrc = resources.zunmonImage;
 	characterImageElement.setAttribute('src', characterImageSrc);
 
 	const backgroundSelect = document.getElementById('background');
@@ -28,10 +28,13 @@ function init_html() {
 document.addEventListener("DOMContentLoaded", function () {
 	const networkHandler = new NetworkHandler();
 	networkHandler.updateStatusHandler = updateStatus;
+	networkHandler.updateAnswerHandler = updateAnswer;
+	networkHandler.speechEndHandler = updateAnswer;
 
 	const speechRecognitionHandler = new SpeechRecognitionHandler();
 	speechRecognitionHandler.initializeRecognition(); //あとでこれ呼ばなくても良いように変更する
 	speechRecognitionHandler.updateStatusHandler = updateStatus;
+
 	let lang = 'ja-JP';
 
 	init_html();
@@ -49,6 +52,21 @@ document.addEventListener("DOMContentLoaded", function () {
 		}, displayTime * 1000);
 	}
 
+	// answer area
+	function updateAnswer(text, isStop) {
+		const answerElement = document.getElementById('answer');
+		const answertextElement = document.getElementById('answer_text');
+		console.log(`updateAnswer ${text}, ${isStop}`)
+		if(isStop){
+			answertextElement.innerHTML = '';
+			answerElement.style.display = "none";
+		}else{
+			answertextElement.innerHTML = answertextElement.innerHTML + text;
+			answertextElement.scrollTop = answertextElement.scrollHeight;
+			answerElement.style.display = "flex";
+		}
+	}
+
 	//
 	// same as e.code === 'Space'
 	//
@@ -58,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		if (networkHandler.isProcessing || speechRecognitionHandler.isProcessing) {
 			networkHandler.cancelAllConnections();
 			speechRecognitionHandler.stopProcessing();
+			updateAnswer('', true);
 			return;
 		}
 		speechRecognitionHandler.startProcessing(lang);
@@ -89,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			if (networkHandler.isProcessing || speechRecognitionHandler.isProcessing) {
 				networkHandler.cancelAllConnections();
 				speechRecognitionHandler.stopProcessing();
+				updateAnswer('', true);
 				return;
 			}
 			speechRecognitionHandler.startProcessing(lang);

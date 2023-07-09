@@ -3,7 +3,7 @@
 class SpeechHandlerZundamon {
 	constructor() {
 		this.player = new VoiceVoxPlayer();
-		this.player.audioEndedHandler = this.handleSpeechEnd;
+		this.player.audioEndedHandler = this.handleSpeechEnd.bind(this);
 		this.abortController = new AbortController();
 		this.text = "";
 		this.delimiters = [',', '.', '!', ':', ';', '?', '{', '}', '[', ']', '！', '？', '：', '；', '　', '。', '、',];
@@ -13,8 +13,7 @@ class SpeechHandlerZundamon {
 	}
 
 	handleSpeechEnd(e) {
-		console.log(`handleSpeechEnd: [${e.isStop}] ${e.text}`);
-
+		console.log(`handleSpeechEnd: [${e.isStop}]`);
 		this.speechEndHandler(e.isStop);
 	}
 
