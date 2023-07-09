@@ -7,10 +7,15 @@ class SpeechHandlerZundamon {
 		this.abortController = new AbortController();
 		this.text = "";
 		this.delimiters = [',', '.', '!', ':', ';', '?', '{', '}', '[', ']', '！', '？', '：', '；', '　', '。', '、',];
+
+		// Handler
+		this.speechEndHandler = null;
 	}
 
 	handleSpeechEnd(e) {
 		console.log(`handleSpeechEnd: [${e.isStop}] ${e.text}`);
+
+		this.speechEndHandler(e.isStop);
 	}
 
 	speak(text, isStop, lang) {

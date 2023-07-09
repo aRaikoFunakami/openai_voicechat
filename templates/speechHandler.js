@@ -33,12 +33,17 @@ class SpeechHandler {
 		this.utterances = [];
 		this.text = "";
 		this.delimiters = [',', '.', '!', ':', ';', '?', '{', '}', '[', ']', '！', '？', '：', '；', '　', '。', '、',];
+
+		// Handler
+		this.speechEndHandler = null;
 	}
 
 	handleSpeechEnd(event) {
 		const utterance = event.target;
 		const isStop = utterance.isStop;
 		console.log(`utterance.finish: ${isStop}`);
+		
+		this.speechEndHandler(isStop);
 	}
 
 	speakUtterance(text, isStop, lang) {

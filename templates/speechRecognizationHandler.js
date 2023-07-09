@@ -1,7 +1,7 @@
 class SpeechRecognitionHandler {
 	constructor() {
 		this.recognition = null;
-		this.isSpeechRecognizing = false;
+		this.isProcessing = false;
 		this.recognizedText = '';
 
 		//handlers
@@ -22,18 +22,21 @@ class SpeechRecognitionHandler {
 		});
 		this.recognition.addEventListener("end", () => {
 			console.log("recognition end");
-			this.isSpeechRecognizing = false;
+			this.isProcessing = false;
 			video.muted = false;
+			this.stopProcessing(); // 修正するばぐ
 		});
 		this.recognition.addEventListener("nomatch", (event) => {
 			console.log("recognition nomatch");
-			this.isSpeechRecognizing = false;
+			this.isProcessing = false;
 			video.muted = false;
+			this.stopProcessing();
 		});
 		this.recognition.addEventListener("error", (event) => {
 			console.log("recognition error");
-			this.isSpeechRecognizing = false;
+			this.isProcessing = false;
 			video.muted = false;
+			this.stopProcessing();
 		});
 
 		this.recognition.addEventListener("result", (event) => {
@@ -54,7 +57,7 @@ class SpeechRecognitionHandler {
 			this.recognizedText = text;
 			this.updateStatusHandler(text, 2);
 
-			if(this.recognizedText.length > 0 && is_final){
+			if(this.recognizedText.length > 0 && is_final && this.isProcessing){
 				this.recognizedHandler(this.recognizedText);
 			}
 		});
@@ -66,17 +69,17 @@ class SpeechRecognitionHandler {
 		}
 		this.isPushedMicButton = true;
 
-		if (this.isSpeechRecognizing) 
+		if (this.isProcessing) 
 			return;
 
 		this.recognizedText = "";
-		this.isSpeechRecognizing = true;
+		this.isProcessing = true;
 		microphone.style.filter = "brightness(0%) sepia(1000%) hue-rotate(0deg)";
 		video.muted = true;
 
 		this.recognition.lang = lang;
 		if (this.recognition.lang === "en-US") {
-			this.updateStatusHandler("Voice recognition in progress...", 3);
+			this.updateStatusHandler("Voice recognition...", 3);
 		} else if (this.recognition.lang === "ja-JP") {
 			this.updateStatusHandler("音声認識中です...", 3);
 		} else if (this.recognition.lang === "zh-CN") {
@@ -90,13 +93,14 @@ class SpeechRecognitionHandler {
 		this.isPushedMicButton = false;
 		microphone.style.filter = "invert(100%) sepia(100%) saturate(0%) hue-rotate(0deg)";
 
-//		if (this.isSpeechRecognizing) {
+		if (this.isProcessing) {
 			console.log("Cancel Speech Recognition");
 			this.recognizedText = "";
 			this.recognition.stop();
 			this.updateStatusHandler("Cancel Speech Recognition.", 1);
 			this.canceledHandler();
+			this.isProcessing = false;
 			return;
-//		}
+		}
 	}
 }

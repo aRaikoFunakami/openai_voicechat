@@ -32,6 +32,12 @@ document.addEventListener("DOMContentLoaded", function () {
 	// change language
 	window.addEventListener('keypress', (e) => {
 		if (e.code === 'Space') {
+			// cCancel if the process is in progress.
+			if(networkHandler.isProcessing || speechRecognitionHandler.isProcessing){
+				networkHandler.cancelAllConnections();
+				speechRecognitionHandler.stopProcessing();
+				return;
+			}
 			speechRecognitionHandler.startProcessing(lang);
 		}
 		else if (e.code === 'KeyE') {

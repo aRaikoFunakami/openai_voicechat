@@ -2,6 +2,7 @@
 
 class NetworkHandler {
 	constructor() {
+		this.isProcessing = false;
 		this.eventSources = [];
 		this.speechHandler = new SpeechHandler();
 		this.speechHandlerZundamon = new SpeechHandlerZundamon();
@@ -13,6 +14,8 @@ class NetworkHandler {
 
 	cancelAllConnections() {
 		console.log('NetworkHandler.cancelAllConnections');
+		this.isProcessing =  false;
+
 		this.eventSources.forEach((eventSource) => {
 			if (eventSource && eventSource.readyState !== EventSource.CLOSED) {
 				console.log(`Cancel network connection: ${eventSource.url}`);
@@ -45,9 +48,15 @@ class NetworkHandler {
 
 		if (this.lang == 'ja-JP') {
 			this.speechHandlerZundamon.speak(text, finish === "stop", this.lang);
+			this.speechHandlerZundamon.handleSpeechEnd = (isStop) => {
+				this.isProcessing = !isStop;
+			};
 		}
 		else {
 			this.speechHandler.speak(text, finish === "stop", this.lang);
+			this.speechHandler.handleSpeechEnd = (isStop) => {
+				this.isProcessing = !isStop;
+			};
 		}
 	}
 
@@ -59,6 +68,7 @@ class NetworkHandler {
 	}
 
 	setupEventSource(text, lang = 'ja-JP') {
+		this.isProcessing = true;
 		this.lang = lang;
 		const eventSource = new EventSource(`http://127.0.0.1:8001/input?text=${encodeURIComponent(text)}`);
 		this.eventSources.push(eventSource);
