@@ -27,10 +27,18 @@ class NetworkHandler {
 		this.speechHandler.speak(text, finish === "stop", this.lang);
 	}
 
+	handleEventSourceError(event) {
+		console.error('Error occurred:', event);
+		this.eventSources.forEach((source)=>{
+			source.close();
+		});
+	}
+
 	setupEventSource(text, lang = 'ja-JP') {
 		this.lang = lang;
 		const eventSource = new EventSource(`http://127.0.0.1:8001/input?text=${encodeURIComponent(text)}`);
 		this.eventSources.push(eventSource);
 		eventSource.onmessage = this.handleEventSourceMessage.bind(this);
+		eventSource.onerror = this.handleEventSourceError.bind(this);
 	}
 }

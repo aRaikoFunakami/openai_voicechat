@@ -2,7 +2,8 @@
 <html>
 
 <head>
-    <title>My Web Page</title>
+	<link rel="stylesheet" href="styles.css">
+	<script src="resources.js" type="text/javascript"></script>
     <script src="networkHandler.js" type="text/javascript"></script>
     <script src="speechHandler.js" type="text/javascript"></script>
 	<script src="speechHandlerZundamon.js" type="text/javascript"></script>
@@ -12,12 +13,47 @@
 </head>
 
 <body>
-	<div> hello, world</div>
-	<button id="myButton">Click me</button>
-	<button id="cancelButton">Cancel</button>
-	<div> microphone </div>
-	<div id="status"></div>
-	<video id="video"></video>
+    <!-- please get a video from  https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.720p.webm -->
+    <video id="video" src="http://127.0.0.1:8001/media/background_carnavi.mp4" autoplay loop muted></video>
+
+    <!-- 
+            ずんだもんのイラスト https://zunko.jp/con_illust.html 
+            VOICEVOX:ずんだもん
+    -->
+    <div id="answer">
+        <img id="characterImage" src="http://127.0.0.1:8001/media/zunmon.png">
+        <div id="answer_text"></div>
+    </div>
+    <div id="container">
+        <p id="status"></p>
+        <button id="microphone"></button>
+    </div>
+
+    <script>
+        var videoUrls = [
+            "http://127.0.0.1:8001/media/background_carnavi.mp4",
+            "http://127.0.0.1:8001/lexus_navi.mp4",
+            "http://127.0.0.1:8001/Big_Buck_Bunny_4K.webm.720p.webm",
+            "http://127.0.0.1:8001/video2.mp4",
+            //... more URLs if needed
+        ];
+        var videoTimes = new Array(videoUrls.length).fill(0);
+        var currentVideoIndex = 0;
+        document.addEventListener('keydown', function (event) {
+            if (event.keyCode >= 49 && event.keyCode <= 57) {
+                var videoIndex = event.keyCode - 49; // 49 is the keyCode for '1'
+                if (videoUrls[videoIndex] !== undefined) {
+                    var videoElement = document.getElementById('video');
+                    videoTimes[currentVideoIndex] = videoElement.currentTime;
+                    videoElement.src = videoUrls[videoIndex];
+                    videoElement.currentTime = videoTimes[videoIndex];
+                    videoElement.play();
+                    currentVideoIndex = videoIndex;
+                }
+            }
+        });
+    </script>
+
 </body>
 
 </html>

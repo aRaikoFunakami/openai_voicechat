@@ -1,0 +1,78 @@
+/* styles.css */
+
+body,
+html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#video {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    width: 100%;
+    height: auto;
+    z-index: -100;
+    object-fit: contain;
+}
+
+#microphone {
+    position: relative;
+    z-index: 1;
+    /* background-image: url(`${resources.microphoneImage}`);*/
+    background-size: cover;
+    width: 100px;
+    height: 100px;
+    border: none;
+    background-color: rgba(0, 0, 0, 0.0);
+    filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(0deg);
+}
+
+#status {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 25px;
+    color: white;
+    padding: 15px;
+    font-size: 48px;
+    display: none;
+}
+
+#answer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 60%;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 25px;
+    color: white;
+    padding: 15px;
+    overflow-y: scroll;
+    font-weight: bold;
+    font-size: 36px;
+    word-wrap: break-word;
+    display: none;
+}
+
+#answer_text {
+    overflow-y: scroll;
+}
+
+#container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    position: fixed;
+    bottom: 2%;
+}
+
+#characterImage {
+    z-index: 100;
+    display: flex;
+}

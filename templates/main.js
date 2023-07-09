@@ -1,5 +1,10 @@
 // main.js
 
+function init_html(){
+	const microphone = document.getElementById("microphone");
+	microphone.style.backgroundImage = resources.microphoneImage;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 	const myButton = document.getElementById("myButton");
 	const cancelButton = document.getElementById("cancelButton");
@@ -9,14 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	speechRecognitionHandler.updateStatusHandler = updateStatus;
 	let lang = 'ja-JP';
 
-	myButton.addEventListener("click", function () {
-		networkHandler.setupEventSource('横浜の天気 晴天', lang);
-	});
-
-	cancelButton.addEventListener("click", function () {
-		networkHandler.cancelAllConnections();
-	});
-
+	init_html();
 	// status display area (notification and debug)
 	let timeoutHandle_updateStatus = null;
 	function updateStatus(text, displayTime = 1) {
