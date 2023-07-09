@@ -14,7 +14,7 @@ model_name = "gpt-3.5-turbo-0613"
 
 # default_persist_directory = "./chroma_split_documents"
 # default_persist_directory = "./chroma_load_and_split"
-default_persist_directory = "./chroma_panasonic_viera"
+default_persist_directory = "./chroma_viera"
 
 
 # load config
@@ -48,7 +48,7 @@ def get_pdf_info(query, persist_directory = default_persist_directory):
 #
 # call by openai functional calling
 #
-def get_pdf_lexus_info(query, persist_directory = './chroma_load_and_split'):
+def get_pdf_lexus_info(query, persist_directory = './chroma_lexus'):
     return get_pdf_info(query, persist_directory)
 
 pdf_lexus_function = {
@@ -66,7 +66,7 @@ pdf_lexus_function = {
     },
 }
 
-def get_pdf_viera_info(query, persist_directory = './chroma_panasonic_viera'):
+def get_pdf_viera_info(query, persist_directory = './chroma_viera'):
     return get_pdf_info(query, persist_directory)
 
 pdf_viera_function = {
