@@ -36,13 +36,16 @@ class SpeechHandler {
 
 		// Handler
 		this.speechEndHandler = null;
+
+		// Chrome will return an empty array if the first call is to an empty array.
+		speechSynthesis.getVoices();
 	}
 
 	handleSpeechEnd(event) {
 		const utterance = event.target;
 		const isStop = utterance.isStop;
 		console.log(`utterance.finish: ${isStop}`);
-		
+
 		this.speechEndHandler(isStop);
 	}
 
@@ -55,12 +58,10 @@ class SpeechHandler {
 		// language setting before speak
 		//
 		console.log(`SpeechHandler.speakUtterance ${lang}`)
-		var voices = speechSynthesis.getVoices()
+		var voices = speechSynthesis.getVoices();
 		if (lang == 'en-US') {
 			utterance.lang = 'en-US';
-			//utterThis.voice = voices[39]; // en-US:Fred
 			utterance.voice = voices[145]; // en-US:Google US English Female
-			//utterThis.voice = voices[146]; // en-GB:Google UK English Female
 			utterance.rate = 0.9;
 		} else if (lang == 'zh-CN') {
 			utterance.lang = 'zh-CN';
