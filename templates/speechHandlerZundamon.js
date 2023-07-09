@@ -14,11 +14,12 @@ class SpeechHandlerZundamon {
 	}
 
 	speak(text, isStop, lang) {
-		console.log(`SpeechHandlerZundamon.speak ${text}, ${isStop}, (${this.player}, ${this.abortController})`)
-		this.text += text + ' ';
+		//console.log(`SpeechHandlerZundamon.speak ${text}, ${isStop}, (${this.player}, ${this.abortController})`)
+		//this.text += text + ' ';
+		this.text += text;
 		while (true) {
 			const [firstPart, restPart] = splitTextByDelimiters(this.text, this.delimiters);
-			// console.log(`firstPart:${firstPart}, restPart:${restPart}(${restPart == ""}})`);
+			console.log(`firstPart:${firstPart}, restPart:${restPart}(${restPart == ""}})`);
 
 			// Buffer is empty, but speak is called again
 			if (restPart == "" && isStop != true) {

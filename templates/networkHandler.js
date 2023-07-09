@@ -4,11 +4,12 @@ class NetworkHandler {
 	constructor() {
 		this.eventSources = [];
 		this.speechHandler = new SpeechHandler();
-		//this.speechHandler = new SpeechHandlerZundamon();
+		this.speechHandlerZundamon = new SpeechHandlerZundamon();
 		this.lang = null;
 	}
 
 	cancelAllConnections() {
+		console.log('NetworkHandler.cancelAllConnections');
 		this.eventSources.forEach((eventSource) => {
 			if (eventSource && eventSource.readyState !== EventSource.CLOSED) {
 				console.log(`Cancel network connection: ${eventSource.url}`);
@@ -16,6 +17,7 @@ class NetworkHandler {
 			}
 		});
 		this.speechHandler.cancelAllSpeeches();
+		this.speechHandlerZundamon.cancelAllSpeeches();
 	}
 
 	handleEventSourceMessage(event) {
@@ -24,7 +26,12 @@ class NetworkHandler {
 		const type = jsonData.type;
 		const finish = jsonData.finish_reason;
 		console.log(`NetworkHandler.handleEventSourceMessage text: ${text}, type: ${type}, finish: ${finish}`);
-		this.speechHandler.speak(text, finish === "stop", this.lang);
+		if(this.lang == 'ja-JP'){
+			this.speechHandlerZundamon.speak(text, finish === "stop", this.lang);
+		}
+		else{
+			this.speechHandler.speak(text, finish === "stop", this.lang);
+		}
 	}
 
 	handleEventSourceError(event) {
