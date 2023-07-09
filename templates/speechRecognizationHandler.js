@@ -24,7 +24,6 @@ class SpeechRecognitionHandler {
 			console.log("recognition end");
 			this.isSpeechRecognizing = false;
 			video.muted = false;
-			this.recognizedHandler(this.recognizedText);
 		});
 		this.recognition.addEventListener("nomatch", (event) => {
 			console.log("recognition nomatch");
@@ -54,6 +53,10 @@ class SpeechRecognitionHandler {
 			}
 			this.recognizedText = text;
 			this.updateStatusHandler(text, 2);
+
+			if(this.recognizedText.length > 0 && is_final){
+				this.recognizedHandler(this.recognizedText);
+			}
 		});
 	}
 
@@ -68,7 +71,7 @@ class SpeechRecognitionHandler {
 
 		this.recognizedText = "";
 		this.isSpeechRecognizing = true;
-		//microphone.style.filter = "brightness(0%) sepia(1000%) hue-rotate(0deg)";
+		microphone.style.filter = "brightness(0%) sepia(1000%) hue-rotate(0deg)";
 		video.muted = true;
 
 		this.recognition.lang = lang;
@@ -85,14 +88,15 @@ class SpeechRecognitionHandler {
 
 	stopProcessing() {
 		this.isPushedMicButton = false;
-		//microphone.style.filter = "invert(100%) sepia(100%) saturate(0%) hue-rotate(0deg)";
+		microphone.style.filter = "invert(100%) sepia(100%) saturate(0%) hue-rotate(0deg)";
 
-		if (this.isSpeechRecognizing) {
+//		if (this.isSpeechRecognizing) {
 			console.log("Cancel Speech Recognition");
+			this.recognizedText = "";
 			this.recognition.stop();
 			this.updateStatusHandler("Cancel Speech Recognition.", 1);
 			this.canceledHandler();
 			return;
-		}
+//		}
 	}
 }
