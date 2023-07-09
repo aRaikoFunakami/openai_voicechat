@@ -6,9 +6,9 @@ function init_html(){
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-	const myButton = document.getElementById("myButton");
-	const cancelButton = document.getElementById("cancelButton");
 	const networkHandler = new NetworkHandler();
+	networkHandler.updateStatusHandler = updateStatus;
+
 	const speechRecognitionHandler = new SpeechRecognitionHandler();
 	speechRecognitionHandler.initializeRecognition(); //あとでこれ呼ばなくても良いように変更する
 	speechRecognitionHandler.updateStatusHandler = updateStatus;
@@ -59,4 +59,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		console.log('speechRecognitionHandler.recognizedHandler ');
 		networkHandler.setupEventSource(text, lang);
 	}
+
+	
 });

@@ -6,6 +6,9 @@ class NetworkHandler {
 		this.speechHandler = new SpeechHandler();
 		this.speechHandlerZundamon = new SpeechHandlerZundamon();
 		this.lang = null;
+
+		//handlers
+		this.updateStatusHandler = null;
 	}
 
 	cancelAllConnections() {
@@ -26,17 +29,31 @@ class NetworkHandler {
 		const type = jsonData.type;
 		const finish = jsonData.finish_reason;
 		console.log(`NetworkHandler.handleEventSourceMessage text: ${text}, type: ${type}, finish: ${finish}`);
-		if(this.lang == 'ja-JP'){
+
+		if (type == 'notification') {
+			//status.innerText = text;
+			this.updateStatusHandler(text, 1);
+			return;
+		}
+		//else {
+		// ストリームで受け取ったデータを徐々に表示する
+		//answer.style.display = 'flex';
+		//answer_text.innerHTML = answer_text.innerHTML + data;
+		//}
+		// レスポンス領域を自動スクロール
+		//answer_text.scrollTop = answer_text.scrollHeight;
+
+		if (this.lang == 'ja-JP') {
 			this.speechHandlerZundamon.speak(text, finish === "stop", this.lang);
 		}
-		else{
+		else {
 			this.speechHandler.speak(text, finish === "stop", this.lang);
 		}
 	}
 
 	handleEventSourceError(event) {
 		console.error('Error occurred:', event);
-		this.eventSources.forEach((source)=>{
+		this.eventSources.forEach((source) => {
 			source.close();
 		});
 	}
