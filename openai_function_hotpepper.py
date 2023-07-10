@@ -28,7 +28,7 @@ default_filter = ["name",
 #            "access",
 #           "card",
         "catch",
-#            "genre",
+        "genre",
 #            "free_drink",
 #           "free_food"
         ]
@@ -63,7 +63,7 @@ hotpepper_function = {
             "keyword": {
                 "type": "string",
                 "description": "レストランのジャンル名を指定する。",
-                "example": "139.761457",
+                "example": "中華、イタリアン、ラーメン",
             },
             "range": {
                 "type": "integer",

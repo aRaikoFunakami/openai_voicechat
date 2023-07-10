@@ -28,17 +28,14 @@ get_weather_info_prompt = f'''
 あなたは天気を説明するアナウンサーです
 次の制約事項に従って入力文に簡潔に回答してください
 #制約事項:
-- 温度19度や湿度20%といった数字は今日の天気の場合もしくは大きな変動がある場合だけ使う
 - 具体的な数字の代わりに暑苦しい、肌寒い、など感覚的な回答を行う
 - 雨の可能性があれば傘をもって出かけるべきだと回答する
-- 必ず30文字以内で答えよ
 #入力文:
 '''
 
 get_pdf_info_prompt = f'''
 次の条件に従って入力文に簡潔に回答してください
 #条件:
-複数の方法がある場合にはできるだけ複数の方法を答えよ
 絶対に50文字以内で答えよ
 わからない場合に嘘をついてはいけない。わからない場合にはわからないと答える。
 #入力文:
@@ -113,9 +110,13 @@ def call_defined_function(message):
             longitude=arguments.get("longitude"),
         )
     elif function_name == "get_pdf_lexus_info":
-        return get_pdf_lexus_info(arguments.get("query"))
+        print(f'function_pdf: {q}')
+        q = translate_text(arguments.get("query"), 'ja')
+        return get_pdf_lexus_info(q)
     elif function_name == "get_pdf_viera_info":
-        return get_pdf_viera_info(arguments.get("query"))
+        q = translate_text(arguments.get("query"), 'ja')
+        print(f'function_pdf: {q}')
+        return get_pdf_viera_info(q)
     elif function_name == "get_hotpepper_info":
         #キーワードは日本語に変換する
         arguments['keyword'] = translate_text(arguments['keyword'], 'ja')
@@ -137,7 +138,7 @@ defualt_language = 'English'
 
 def translate_text(text, lang = 'ja'):
     from_lang_id = langid.classify(text)[0]
-    logging.info('from:%s(%s), to:%s(%s)',from_lang_id, ISO639.get(from_lang_id, defualt_language), lang, ISO639.get(lang,defualt_language))
+    logging.info('text:%s from:%s(%s), to:%s(%s)',text, from_lang_id, ISO639.get(from_lang_id, defualt_language), lang, ISO639.get(lang,defualt_language))
     lang_to = ISO639.get(lang,defualt_language)
     lang_from = ISO639.get(from_lang_id, defualt_language)
     # lang に翻訳する
@@ -276,6 +277,9 @@ def streaming_chat(input, callback):
     try:
         if(is_prompt_debug):
             print(f'prompt: {prompt_2}')
+            print(f'name: {function_name}')
+            print(f'content: {function_response}')
+
         second_response = openai.ChatCompletion.create(
             model=model02,
             temperature = 0.2,
