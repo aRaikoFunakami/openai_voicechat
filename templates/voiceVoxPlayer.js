@@ -9,8 +9,8 @@ class VoiceVoxPlayer {
 	playAudio(
 		textData,
 		isStop,
-		audioQueryUrl = "http://127.0.0.1:50021/audio_query?speaker=1",
-		synthesisUrl = "http://127.0.0.1:50021/synthesis?speaker=1"
+		audioQueryUrl = resources.audioQueryUrl,
+		synthesisUrl = resources.synthesisUrl
 	) {
 		var audioQueryData = "&text=" + encodeURIComponent(textData);
 		audioQueryUrl = audioQueryUrl + audioQueryData;

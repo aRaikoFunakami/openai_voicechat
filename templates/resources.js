@@ -1,15 +1,20 @@
+const server = 'http://127.0.0.1:8001';
+const voicevoxserver = 'http://127.0.0.1:50021';
+
 const resources = {
-	server: 'http://127.0.0.1:8001',
+	server: `${server}`,
+	audioQueryUrl: `${voicevoxserver}/audio_query?speaker=1`,
+	synthesisUrl: `${voicevoxserver}/synthesis?speaker=1`,
 	// for CSS
-	microphoneImage: 'url(http://127.0.0.1:8001/media/icon_mic.png)',
+	microphoneImage: `url(${server}/media/icon_mic.png)`,
 	// for JS
-	settingImage: 'http://127.0.0.1:8001/media/icon_setting.png',
-	zunmonImage: 'http://127.0.0.1:8001/media/zunmon.png',
+	settingImage: `${server}/media/icon_setting.png`,
+	zunmonImage: `${server}/media/zunmon.png`,
 	videoUrls: [
-		"http://127.0.0.1:8001/media/background_carnavi.mp4",
-		"http://127.0.0.1:8001/media/background_lexus_navi.mp4",
-		"http://127.0.0.1:8001/media/background_bigbuckbunny.webm",
-		"http://127.0.0.1:8001/media/background_soccer.mp4",
+		`${server}/media/background_carnavi.mp4`,
+		`${server}/media/background_lexus_navi.mp4`,
+		`${server}/media/background_bigbuckbunny.webm`,
+		`${server}/media/background_soccer.mp4`,
 		//... more URLs if needed
 	],
 	// 他のリソースもここに追加できます

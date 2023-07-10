@@ -77,7 +77,7 @@ class NetworkHandler {
 	setupEventSource(text, lang = 'ja-JP') {
 		this.isProcessing = true;
 		this.lang = lang;
-		const eventSource = new EventSource(`http://127.0.0.1:8001/input?text=${encodeURIComponent(text)}`);
+		const eventSource = new EventSource(`${resources.server}/input?text=${encodeURIComponent(text)}`);
 		this.eventSources.push(eventSource);
 		eventSource.onmessage = this.handleEventSourceMessage.bind(this);
 		eventSource.onerror = this.handleEventSourceError.bind(this);
