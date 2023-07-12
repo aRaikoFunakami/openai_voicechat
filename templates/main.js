@@ -12,9 +12,9 @@ function init_html() {
 	const settingImageSrc = resources.settingImage;
 	settingImageElement.setAttribute('src', settingImageSrc);
 
-	const characterImageElement = document.getElementById('characterImage');
-	const characterImageSrc = resources.zunmonImage;
-	characterImageElement.setAttribute('src', characterImageSrc);
+	//const characterImageElement = document.getElementById('characterImage');
+	//const characterImageSrc = resources.zunmonImage;
+	//characterImageElement.setAttribute('src', characterImageSrc);
 
 	const backgroundSelect = document.getElementById('background');
 	for (var i = 0; i < resources.videoUrls.length; i++) {
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			answertextElement.innerHTML = '';
 			answerElement.style.display = "none";
 		}else{
-			answertextElement.innerHTML = answertextElement.innerHTML + text;
+			answertextElement.innerHTML = marked.parse(answertextElement.innerText + text);
 			answertextElement.scrollTop = answertextElement.scrollHeight;
 			answerElement.style.display = "flex";
 		}

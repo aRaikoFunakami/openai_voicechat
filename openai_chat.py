@@ -26,7 +26,7 @@ model02="gpt-3.5-turbo-0613"
 
 get_weather_info_prompt = f'''
 あなたは天気を説明するアナウンサーです
-次の制約事項に従って入力文に簡潔に回答してください
+次の制約事項に従って入力文に簡潔に50文字以内に要約して回答しなさい
 #制約事項:
 - 具体的な数字の代わりに暑苦しい、肌寒い、など感覚的な回答を行う
 - 雨の可能性があれば傘をもって出かけるべきだと回答する
@@ -34,16 +34,16 @@ get_weather_info_prompt = f'''
 '''
 
 get_pdf_info_prompt = f'''
-次の条件に従って入力文に簡潔に50文字以内にまとめて回答してください
+次の条件に従って入力文の回答を50文字以内に要約して作成しなさい
 #条件:
-絶対に50文字以内で答えよ.
 わからない場合に嘘をついてはいけない。わからない場合にはわからないと答える。
 #入力文:
 '''
 
 get_hotpepper_info_prompt = f'''
 入力文から複数のレストランの情報をJSON形式で受け取ります。
-おもわず行きたくなるうたい文句でレストランを簡潔に紹介しなさい。
+回答に含めるレストラン情報は最大3件までとする
+おもわず行きたくなるうたい文句でレストランを簡潔に50文字以内に要約して回答しなさい
 紹介するデータがなければ、データが存在しないと回答する。
 #入力文:
 '''
@@ -268,10 +268,9 @@ def streaming_chat(input, callback):
         callback(None)
         return
     
-    import markdown
     function_name = message["function_call"]["name"]
     if 'get_pdf_' in function_name:
-        response = { 'response': markdown.markdown(function_response), 'finish_reason': 'stop'}
+        response = { 'response':function_response, 'finish_reason': 'stop'}
         callback(json.dumps(response, ensure_ascii=False))
         return
     
