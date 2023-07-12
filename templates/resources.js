@@ -1,10 +1,13 @@
-const server = 'http://127.0.0.1:8001';
-const voicevoxserver = 'http://127.0.0.1:50021';
+//const server = 'https://k230703-03.tok.access-company.com:8001';
+const server = 'https://k230703-03.tok.access-company.com';
+const voicevoxserver = 'https://k230703-03.tok.access-company.com:50021';
 
 const resources = {
 	server: `${server}`,
-	audioQueryUrl: `${voicevoxserver}/audio_query?speaker=1`,
-	synthesisUrl: `${voicevoxserver}/synthesis?speaker=1`,
+	//audioQueryUrl: `${voicevoxserver}/audio_query?speaker=1`,
+	//synthesisUrl: `${voicevoxserver}/synthesis?speaker=1`,
+	audioQueryUrl: `${server}/audio_query?speaker=1`,
+	synthesisUrl: `${server}/synthesis?speaker=1`,
 	// for CSS
 	microphoneImage: `url(${server}/media/icon_mic.png)`,
 	// for JS

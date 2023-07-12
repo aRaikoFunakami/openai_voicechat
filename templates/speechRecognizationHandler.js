@@ -33,7 +33,7 @@ class SpeechRecognitionHandler {
 			this.stopProcessing();
 		});
 		this.recognition.addEventListener("error", (event) => {
-			console.log("recognition error");
+			console.log(`recognition error, ${event.error}`);
 			this.isProcessing = false;
 			video.muted = false;
 			this.stopProcessing();

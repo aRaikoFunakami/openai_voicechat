@@ -36,7 +36,7 @@ get_weather_info_prompt = f'''
 get_pdf_info_prompt = f'''
 次の条件に従って入力文に簡潔に回答してください
 #条件:
-絶対に50文字以内で答えよ
+絶対に50文字以内で答えよ.
 わからない場合に嘘をついてはいけない。わからない場合にはわからないと答える。
 #入力文:
 '''
@@ -44,6 +44,7 @@ get_pdf_info_prompt = f'''
 get_hotpepper_info_prompt = f'''
 入力文から複数のレストランの情報をJSON形式で受け取ります。
 おもわず行きたくなるうたい文句でレストランを簡潔に紹介しなさい。
+紹介するデータがなければ、データが存在しないと回答する。
 #入力文:
 '''
 
@@ -53,6 +54,13 @@ prompts = {
     "get_pdf_lexus_info" : get_pdf_info_prompt,
     "get_pdf_viera_info" : get_pdf_info_prompt,
     "get_hotpepper_info" : get_hotpepper_info_prompt,
+}
+
+functions_description = {
+    "get_weather_info": '気象データ',
+    "get_pdf_lexus_info" : 'レクサスの取扱説明書',
+    "get_pdf_viera_info" : 'ビエラの取扱説明書',
+    "get_hotpepper_info" : 'ホットペッパー',
 }
 
 
@@ -110,8 +118,8 @@ def call_defined_function(message):
             longitude=arguments.get("longitude"),
         )
     elif function_name == "get_pdf_lexus_info":
-        print(f'function_pdf: {q}')
         q = translate_text(arguments.get("query"), 'ja')
+        print(f'function_pdf: {q}')
         return get_pdf_lexus_info(q)
     elif function_name == "get_pdf_viera_info":
         q = translate_text(arguments.get("query"), 'ja')
@@ -266,7 +274,12 @@ def streaming_chat(input, callback):
     logging.info(f"選択された関数に最適な prompt を選ぶ: {function_name}")
     prompt_2 = f"絶対に{ISO639.get(input_lang, defualt_language)}で答えよ" + prompts[function_name] + input
 
-    notify_callback(translate_text(f'回答を作成中です', input_lang), callback)
+    #
+    # 音声で通知
+    #
+    res = { "response": translate_text(f'{functions_description[function_name]}から回答を作成しています。 ', input_lang), "finish_reason": ""}
+    callback(json.dumps(res, ensure_ascii=False))
+    notify_callback(translate_text(f'{functions_description[function_name]}から回答を作成していますす', input_lang), callback)
     #
     # 入力文と同じ言語で回答文を作成する
     #

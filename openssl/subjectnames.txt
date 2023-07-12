@@ -1,0 +1,3 @@
+[ext]
+subjectAltName = DNS:k230703-03.tok.access-company.com, IP:10.5.170.81
+basicConstraints=CA:TRUE
