@@ -1,5 +1,5 @@
-//const server = 'https://k230703-03.tok.access-company.com:8001';
-const server = 'https://k230703-03.tok.access-company.com';
+const server = 'https://k230703-03.tok.access-company.com:8001';
+//const server = 'https://k230703-03.tok.access-company.com';
 const voicevoxserver = 'https://k230703-03.tok.access-company.com:50021';
 
 const resources = {

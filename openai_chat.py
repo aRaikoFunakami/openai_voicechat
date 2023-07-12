@@ -34,7 +34,7 @@ get_weather_info_prompt = f'''
 '''
 
 get_pdf_info_prompt = f'''
-次の条件に従って入力文に簡潔に回答してください
+次の条件に従って入力文に簡潔に50文字以内にまとめて回答してください
 #条件:
 絶対に50文字以内で答えよ.
 わからない場合に嘘をついてはいけない。わからない場合にはわからないと答える。
@@ -250,7 +250,7 @@ def streaming_chat(input, callback):
     #
     # 関数の呼び出し処理
     #
-    notify_callback(translate_text(f'インターネットやDBからデータを取得中です', input_lang), callback)
+    notify_callback(translate_text(f'データを取得中です', input_lang), callback)
     message = {
         "content": None,
         "function_call": f_call,
@@ -258,12 +258,25 @@ def streaming_chat(input, callback):
     }
     function_response = call_defined_function(message)
     logging.info("関数の回答:%s", function_response)
+    
+    #
+    # Error 発生
+    #
     if(function_response is None):
         res = { "response": translate_text("サーバー側でエラーが発生しました", input_lang), "finish_reason": "stop"}
         callback(json.dumps(res, ensure_ascii=False))
         callback(None)
+        return
+    
+    import markdown
+    function_name = message["function_call"]["name"]
+    if 'get_pdf_' in function_name:
+        response = { 'response': markdown.markdown(function_response), 'finish_reason': 'stop'}
+        callback(json.dumps(response, ensure_ascii=False))
+        return
+    
     #
-    # ChatGPT呼び出しの初期化
+    # 次のChatGPT呼び出しの初期化
     #
 
     function_name = message["function_call"]["name"]
@@ -279,7 +292,7 @@ def streaming_chat(input, callback):
     #
     res = { "response": translate_text(f'{functions_description[function_name]}から回答を作成しています。 ', input_lang), "finish_reason": ""}
     callback(json.dumps(res, ensure_ascii=False))
-    notify_callback(translate_text(f'{functions_description[function_name]}から回答を作成していますす', input_lang), callback)
+    notify_callback(translate_text(f'{functions_description[function_name]}から回答を作成しています', input_lang), callback)
     #
     # 入力文と同じ言語で回答文を作成する
     #

@@ -5,6 +5,10 @@ from typing import Any
 import openai
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import ConversationalRetrievalChain
+import markdown
+
 
 '''
 langchainのConversationalRetrievalChain.from_llmを利用する場合にはgpt-4でないと良い回答が得られない
@@ -16,6 +20,10 @@ model_name = "gpt-3.5-turbo-0613"
 # default_persist_directory = "./chroma_load_and_split"
 default_persist_directory = "./chroma_viera"
 
+pdf_titles = {
+    'th_75_65_55lx950_em.pdf': 'ビエラ操作ガイド',
+    'th_75_65_55lx950.pdf': '取り扱い説明書',
+}
 
 # load config
 def load_config():
@@ -24,6 +32,29 @@ def load_config():
     with open(config_file, 'r') as file:
         config = json.load(file)
     return config
+
+def source_string(docs):
+    result = {}
+    for doc in docs:
+        # page should be +1 because of start page is 0
+        doc.metadata['page'] = doc.metadata['page'] + 1
+        # source pdf file to Subject
+        source = doc.metadata.get('source')
+        for key in pdf_titles.keys():
+            if key in source:
+                doc.metadata['source'] = pdf_titles[key]
+        # summarize the reference page with the title of the pdf
+        page = doc.metadata['page']
+        source = doc.metadata.get('source')
+        if source not in result:
+            result[source] = []
+
+        result[source].append(page)
+    # to string
+    response = ''
+    for source, pages in result.items():
+        response = response + f"{source} page.{', '.join(map(str, pages))}"
+    return response
 
 #
 # call by openai functional calling
@@ -38,13 +69,27 @@ def get_pdf_info(query, persist_directory = default_persist_directory):
     embeddings = OpenAIEmbeddings()
     vectorstore = Chroma(embedding_function=embeddings,
                          persist_directory=persist_directory)
+    '''
     docs = vectorstore.similarity_search(query, k=3)
     # making response
     response = ""
     for doc in docs:
         response = response + doc.page_content + "\n"
     return response
+    '''
+    # 参照するPDFファイルが日本語のため相性を合わせる
+    chat_history = []
+    llm = ChatOpenAI(temperature=0, model_name = model_name)
+    pdf_qa = ConversationalRetrievalChain.from_llm(llm, vectorstore.as_retriever(), return_source_documents=True)
+    result = pdf_qa({"question": query, "chat_history": chat_history})
+#    print(result["answer"])
+#    print(source_string(result['source_documents']))
+    response = result["answer"] + '\n' + source_string(result['source_documents'])
+    print(response)
+    return response
 
+
+    
 #
 # call by openai functional calling
 #
@@ -94,8 +139,10 @@ def call_defined_function(message):
     function_name = message["function_call"]["name"]
     logging.debug("選択された関数を呼び出す: %s", function_name)
     arguments = json.loads(message["function_call"]["arguments"])
-    if function_name == "get_pdf_info":
-        return get_pdf_info(arguments.get("query"))
+    if function_name == "get_pdf_viera_info":
+        return get_pdf_viera_info(arguments.get("query"))
+    elif function_name == "pdf_lexus_function":
+        return pdf_lexus_function(arguments.get("query"))
     else:
         return None
 
@@ -156,10 +203,10 @@ queries1 = [
 ]
 
 queries = [
-    ["カーナビでYouTubeを見る手順を教えてください。", "get_pdf_lexus_info"],
-    ["What is the procedure for watching YouTube on a car navigation system?", "get_pdf_lexus_info"],
-    ['ビエラでYouTubeを見たい', "get_pdf_viera_info"],
-    ['I want to watch YouTube on my Viera.', "get_pdf_viera_info"],
+#    ["カーナビでYouTubeを見る手順を教えてください。", "get_pdf_lexus_info"],
+#    ["What is the procedure for watching YouTube on a car navigation system?", "get_pdf_lexus_info"],
+    ['ビエラでハイブリッドキャストの設定の仕方を教えて', "get_pdf_viera_info"],
+    ['How do I set up hybrid cast on my Viera?', "get_pdf_viera_info"],
 ]
 
 def main():
