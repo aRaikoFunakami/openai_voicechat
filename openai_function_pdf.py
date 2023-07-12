@@ -21,8 +21,11 @@ model_name = "gpt-3.5-turbo-0613"
 default_persist_directory = "./chroma_viera"
 
 pdf_titles = {
-    'th_75_65_55lx950_em.pdf': 'ビエラ操作ガイド',
-    'th_75_65_55lx950.pdf': '取り扱い説明書',
+    'th_75_65_55lx950_em.pdf': '操作ガイド',
+    'th_75_65_55lx950.pdf': '取扱説明書',
+    'NX350-NX250_MM_JP_M78364N_1_2303.pdf':'マルチメディア取扱説明書',
+    'NX350-NX250_OM_JP_M78364V_1_2303.pdf':'取扱説明書',
+    'NX350-NX250_UG_JP_M78364_1_2303.pdf':'ユーザーガイド',
 }
 
 # load config
@@ -53,7 +56,7 @@ def source_string(docs):
     # to string
     response = ''
     for source, pages in result.items():
-        response = response + f"{source} page.{', '.join(map(str, pages))}"
+        response = response + f"{source} page.{', '.join(map(str, pages))}" + '\n'
     return response
 
 #
@@ -141,8 +144,8 @@ def call_defined_function(message):
     arguments = json.loads(message["function_call"]["arguments"])
     if function_name == "get_pdf_viera_info":
         return get_pdf_viera_info(arguments.get("query"))
-    elif function_name == "pdf_lexus_function":
-        return pdf_lexus_function(arguments.get("query"))
+    elif function_name == "get_pdf_lexus_info":
+        return get_pdf_lexus_info(arguments.get("query"))
     else:
         return None
 
@@ -203,10 +206,10 @@ queries1 = [
 ]
 
 queries = [
-#    ["カーナビでYouTubeを見る手順を教えてください。", "get_pdf_lexus_info"],
+    ["カーナビのルートを設定したい", "get_pdf_lexus_info"],
 #    ["What is the procedure for watching YouTube on a car navigation system?", "get_pdf_lexus_info"],
-    ['ビエラでハイブリッドキャストの設定の仕方を教えて', "get_pdf_viera_info"],
-    ['How do I set up hybrid cast on my Viera?', "get_pdf_viera_info"],
+#    ['ビエラでハイブリッドキャストの設定の仕方を教えて', "get_pdf_viera_info"],
+#    ['How do I set up hybrid cast on my Viera?', "get_pdf_viera_info"],
 ]
 
 def main():
