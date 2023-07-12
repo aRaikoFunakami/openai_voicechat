@@ -53,6 +53,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	// answer area
+	let answer_text = '';
+	const converter = new showdown.Converter();
 	function updateAnswer(text, isStop) {
 		const answerElement = document.getElementById('answer');
 		const answertextElement = document.getElementById('answer_text');
@@ -60,8 +62,10 @@ document.addEventListener("DOMContentLoaded", function () {
 		if(isStop){
 			answertextElement.innerHTML = '';
 			answerElement.style.display = "none";
+			answer_text = '';
 		}else{
-			answertextElement.innerHTML = marked.parse(answertextElement.innerText + text);
+			answer_text = answer_text + text;
+			answertextElement.innerHTML =converter.makeHtml(answer_text);
 			answertextElement.scrollTop = answertextElement.scrollHeight;
 			answerElement.style.display = "flex";
 		}

@@ -59,11 +59,16 @@ def source_string(docs):
         response = response + f"{source} page.{', '.join(map(str, pages))}" + '\n'
     return response
 
+get_pdf_info_cache_memory = {}
 #
 # call by openai functional calling
 #
 def get_pdf_info(query, persist_directory = default_persist_directory):
     logging.info("%s, %s", query, persist_directory)
+    # very simple cache
+    if(get_pdf_info_cache_memory.get(query) is not None):
+        logging.info("Hit the cache: %s", query)
+        return get_pdf_info_cache_memory[query]
     # initialize OpenAI API
     config = load_config()
     openai.api_key = config["openai_api_key"]
@@ -72,23 +77,14 @@ def get_pdf_info(query, persist_directory = default_persist_directory):
     embeddings = OpenAIEmbeddings()
     vectorstore = Chroma(embedding_function=embeddings,
                          persist_directory=persist_directory)
-    '''
-    docs = vectorstore.similarity_search(query, k=3)
-    # making response
-    response = ""
-    for doc in docs:
-        response = response + doc.page_content + "\n"
-    return response
-    '''
     # 参照するPDFファイルが日本語のため相性を合わせる
     chat_history = []
     llm = ChatOpenAI(temperature=0, model_name = model_name)
     pdf_qa = ConversationalRetrievalChain.from_llm(llm, vectorstore.as_retriever(), return_source_documents=True)
     result = pdf_qa({"question": query, "chat_history": chat_history})
-#    print(result["answer"])
-#    print(source_string(result['source_documents']))
-    response = result["answer"] + '\n' + source_string(result['source_documents'])
-    print(response)
+    response = result["answer"] + '\n\n' + source_string(result['source_documents'])
+    logging.info("%s", response, )
+    get_pdf_info_cache_memory[query] = response
     return response
 
 
