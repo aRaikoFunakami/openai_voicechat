@@ -36,18 +36,10 @@ class NetworkHandler {
 		console.log(`NetworkHandler.handleEventSourceMessage text: ${text}, type: ${type}, finish: ${finish}`);
 
 		if (type == 'notification') {
-			//status.innerText = text;
 			this.updateStatusHandler(text, 1);
 			return;
 		}
 		this.updateAnswerHandler(text, false);
-		//else {
-		// ストリームで受け取ったデータを徐々に表示する
-		//answer.style.display = 'flex';
-		//answer_text.innerHTML = answer_text.innerHTML + data;
-		//}
-		// レスポンス領域を自動スクロール
-		//answer_text.scrollTop = answer_text.scrollHeight;
 
 		if (this.lang == 'ja-JP') {
 			this.speechHandlerZundamon.speak(text, finish === "stop", this.lang);
