@@ -47,6 +47,7 @@ def synthesis():
 
     return relay_response
 
+import langchain_agent
 
 @app.route('/input', methods=["GET"])
 def input():
@@ -59,9 +60,12 @@ def input():
         #    logging.info("response:%s",response)
 
     # callbackの処理を並行して動かすので別スレッドで ChatGPT に問い合わせる
-    producer_thread = threading.Thread(target=openai_chat.chat, args=(input,dummy_callback))
+    #producer_thread = threading.Thread(target=openai_chat.chat, args=(input,dummy_callback))
     # LEXUS のマニュアルについて回答する
     # producer_thread = threading.Thread(target=openai_chatPDF.chat, args=(input,dummy_callback))
+    #producer_thread.start()
+    
+    producer_thread = threading.Thread(target=langchain_agent.chat, args=(input,dummy_callback))
     producer_thread.start()
 
     #
