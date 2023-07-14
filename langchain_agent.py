@@ -154,14 +154,13 @@ def OpenAIFunctionsAgent(tools=None, llm=None, verbose=False):
     global memory
     if(memory is None):
         memory = ConversationBufferMemory(memory_key="memory", return_messages=True)
-
-    # Add the user's prompt to the memory if need
-    prompt = """
-    The following is a friendly conversation between a human and an AI. 
-    The AI is talkative and provides lots of specific details from its context. 
-    If the AI does not know the answer to a question, it truthfully says it does not know.
-    """
-    memory.save_context({"input": prompt}, {"ouput": "understand!"})
+        # Add the user's prompt to the memory if need
+        prompt = """
+        The following is a friendly conversation between a human and an AI. 
+        The AI is talkative and provides lots of specific details from its context. 
+        If the AI does not know the answer to a question, it truthfully says it does not know.
+        """
+        memory.save_context({"input": prompt}, {"ouput": "understand!"})
 
     return initialize_agent(
         tools=tools,
