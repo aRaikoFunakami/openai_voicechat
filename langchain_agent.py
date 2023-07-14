@@ -51,6 +51,8 @@ class WeatherInfo(BaseTool):
     args_schema: Type[BaseModel] = WeatherInfoInput
 
     def _run(self, latitude: int, longitude: int):
+        logging.info(f'get_weather_info(latitude, longitude)')
+        notify('気象情報データを確認しています\n')
         return get_weather_info(latitude, longitude)
 
     def _arun(self, ticker: str):
@@ -79,12 +81,16 @@ class HotpepperInfo(BaseTool):
     args_schema: Type[BaseModel] = HotpepperInfoInput
 
     def _run(self, latitude: str, longitude: str, keyword: str, count: str):
+        if(int(count) > 3):
+            count = 3
         params = {
             "lat": latitude,
             "lng": longitude,
             "keyword": keyword,
             "count": count,
         }
+        notify('ホットペッパーのレストラン情報を確認しています\n')
+        logging.info(f'get_hotpepper_info(params=params)')
         return get_hotpepper_info(params=params)
 
     def _arun(self, ticker: str):
@@ -111,6 +117,8 @@ class LexusInfo(BaseTool):
     args_schema: Type[BaseModel] = PDFInfoInput
 
     def _run(self, query: str):
+        notify('取扱説明書を確認しています\n')
+        logging.info(f'get_pdf_lexus_info(query)')
         return get_pdf_lexus_info(query)
 
     def _arun(self, ticker: str):
@@ -126,6 +134,8 @@ class VieraInfo(BaseTool):
     args_schema: Type[BaseModel] = PDFInfoInput
 
     def _run(self, query: str):
+        notify('取扱説明書を確認しています\n')
+        logging.info(f'get_pdf_viera_info(query)')
         return get_pdf_viera_info(query)
 
     def _arun(self, ticker: str):
@@ -138,6 +148,8 @@ tools = [
     VieraInfo(),
     LexusInfo(),
 ]
+
+
 
 #
 # Ugh!
@@ -155,12 +167,36 @@ def OpenAIFunctionsAgent(tools=None, llm=None, verbose=False):
     if(memory is None):
         memory = ConversationBufferMemory(memory_key="memory", return_messages=True)
         # Add the user's prompt to the memory if need
-        prompt = """
+        #
+        # prompt
+        #
+        prompt_init = '''
         The following is a friendly conversation between a human and an AI. 
         The AI is talkative and provides lots of specific details from its context. 
         If the AI does not know the answer to a question, it truthfully says it does not know.
-        """
-        memory.save_context({"input": prompt}, {"ouput": "understand!"})
+        AI want to talk about their recommendations.
+        '''
+        
+        prompt_answer = '''
+        AI must respond in 50 words or less whenever possible.
+        AI must include their own suggestions in their responses.
+        The AI will include witty and fun topics in its responses.
+        Whenever AI has reference information, it will add that information to the end of the sentence.
+        '''
+
+        prompt_language = '''
+        AThe AI will respond in the same language as it recognized. 
+        For example, if the AI understands that the input sentence is in English, it outputs the sentence in English.
+        '''
+
+        prompts = [
+            prompt_init,
+            prompt_language,
+            prompt_answer,
+        ]
+        for prompt in prompts:
+            memory.save_context({"input": prompt}, {"ouput": "I understood!"})
+
 
     return initialize_agent(
         tools=tools,
@@ -226,9 +262,11 @@ class MyCustomCallbackHandler(BaseCallbackHandler):
         self, serialized: Dict[str, Any], input_str: str, **kwargs: Any
     ) -> Any:
         """Run when tool starts running."""
+        logging.warning(input_str)
 
     def on_tool_end(self, output: str, **kwargs: Any) -> Any:
         """Run when tool ends running."""
+        logging.warning(output)
 
     def on_tool_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
@@ -246,13 +284,32 @@ class MyCustomCallbackHandler(BaseCallbackHandler):
         """Run on agent end."""
 
 
+
+
 #
 # called by app
 #
+import langid
+from openai_translate import translate_text
+from openai_translate import lang_name
+
+def notify(input):
+    if (g_callback is not None):
+        logging.warning(input)
+        res = {"response": input, "finish_reason": ""}
+        g_callback(json.dumps(res))
+
+g_callback = None
+g_lang = None
+
 def chat(input, callback=None):
     logging.info("chatstart")
     load_config()
 
+    global g_callback, g_lang
+    g_callback = callback
+    g_lang = langid.classify(input)[0]
+    
     callback_manager = CallbackManager([MyCustomCallbackHandler(callback)])
     llm = ChatOpenAI(
         temperature=0,
@@ -262,37 +319,39 @@ def chat(input, callback=None):
     )
     agent_chain = OpenAIFunctionsAgent(tools=tools, llm=llm, verbose=True)
 
+    suffix = f'AI must respond in {lang_name(g_lang)}.'
+    input = input + ' ' + suffix
+    logging.warning(input)
+    
     response = agent_chain.run(input=input)
     cprint(f"response: {response}")
+    g_callback = None
+    g_lang = None
 
 
 #
 # test codes
 #
 
-suffix = """
-参照先を含めてアナウンサー口調で50文字以内で答えよ。
-"""
-
-queries2 = [
-    ["今日の東京の天気はどうですか？", "get_weather_info"],
-    ["北海道は？。", "get_weather_info"],
-    ["明日は？。", "get_weather_info"],
+queries1 = [
+    ["今日の横浜の天気は？", "get_weather_info"],
+    ["What is the weather like in Yokohama today?", "get_weather_info"],
+    ["横滨今天的天气如何？", "get_weather_info"],
 ]
 
-queries3 = [
+queries = [
     ["横浜駅前の美味しいラーメン屋を3件教えて", "get_hotpepper_info"],
     ["イタリアンは？", "get_hotpepper_info"],
     ["中華は？", "get_hotpepper_info"],
 ]
 
-queries4 = [
+queries0 = [
     ["カーナビの使い方をしりたい", "get_pdf_lexus_info"],
     ["カーナビに現在地を表示させたい", "get_pdf_lexus_info"],
     ["Webブラウザを起動させたい", "get_pdf_lexus_info"],
 ]
 
-queries = [
+queries3 = [
     ["テレビでハイブリッドキャストの設定方法をしりたい", "get_pdf_viera_info"],
     ["録画のやりかたは？", "get_pdf_viera_info"],
     ["YouTubeを見たい", "get_pdf_viera_info"],
@@ -311,18 +370,18 @@ def dummy_callback(input):
 def test_langchain_support():
     load_config()
     callback_manager = CallbackManager([MyCustomCallbackHandler(dummy_callback)])
-    llm = ChatOpenAI(temperature=0, model=model_name, callback_manager=callback_manager, streaming=True)
+    llm = ChatOpenAI(temperature=0, model=model_name, callback_manager=callback_manager, streaming=False)
     # llm = ChatOpenAI(temperature=0, model=model_name)
     agent_chain = OpenAIFunctionsAgent(tools=tools, llm=llm, verbose=True)
     for query in queries:
-        input = query[0] + suffix
+        input = query[0] 
         response = agent_chain.run(input=input)
         cprint(f"response: {response}")
 
 
 def main():
     logging.basicConfig(
-        level=logging.WARN,
+        level=logging.WARNING,
         format="%(asctime)s - %(filename)s:%(funcName)s[%(lineno)d] - %(message)s",
     )
     test_langchain_support()
