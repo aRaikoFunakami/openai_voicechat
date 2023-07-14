@@ -139,12 +139,21 @@ tools = [
     LexusInfo(),
 ]
 
+#
+# Ugh!
+#
+memory = None
 
 def OpenAIFunctionsAgent(tools=None, llm=None, verbose=False):
     agent_kwargs = {
         "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
     }
-    memory = ConversationBufferMemory(memory_key="memory", return_messages=True)
+    #
+    # Ugh!
+    #
+    global memory
+    if(memory is None):
+        memory = ConversationBufferMemory(memory_key="memory", return_messages=True)
 
     # Add the user's prompt to the memory if need
     prompt = """
@@ -241,24 +250,18 @@ class MyCustomCallbackHandler(BaseCallbackHandler):
 #
 # called by app
 #
-llm = None
-agent_chain = None
-callback_manager = None
-
 def chat(input, callback=None):
     logging.info("chatstart")
     load_config()
 
-    global llm, agent_chain, callback_manager
-    if llm is None or agent_chain is None:
-        callback_manager = CallbackManager([MyCustomCallbackHandler(callback)])
-        llm = ChatOpenAI(
-            temperature=0,
-            model=model_name,
-            callback_manager=callback_manager,
-            streaming=True,
-		)
-        agent_chain = OpenAIFunctionsAgent(tools=tools, llm=llm, verbose=True)
+    callback_manager = CallbackManager([MyCustomCallbackHandler(callback)])
+    llm = ChatOpenAI(
+        temperature=0,
+        model=model_name,
+        callback_manager=callback_manager,
+        streaming=True,
+    )
+    agent_chain = OpenAIFunctionsAgent(tools=tools, llm=llm, verbose=True)
 
     response = agent_chain.run(input=input)
     cprint(f"response: {response}")
