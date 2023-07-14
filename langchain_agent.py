@@ -83,6 +83,8 @@ class HotpepperInfo(BaseTool):
     def _run(self, latitude: str, longitude: str, keyword: str, count: str):
         if(int(count) > 3):
             count = 3
+            
+        keyword = translate_text(keyword, 'ja')
         params = {
             "lat": latitude,
             "lng": longitude,
