@@ -1,6 +1,10 @@
-const server = 'https://k230703-03.tok.access-company.com:8001';
+// HTTP
+const server = 'http://localhost:8080';
+
+// HTTPS
+//const server = 'https://k230703-03.tok.access-company.com:8001';
 //const server = 'https://k230703-03.tok.access-company.com';
-const voicevoxserver = 'https://k230703-03.tok.access-company.com:50021';
+//const voicevoxserver = 'https://k230703-03.tok.access-company.com:50021';
 
 const resources = {
 	server: `${server}`,
@@ -21,6 +25,7 @@ const resources = {
 		//... more URLs if needed
 	],
 	// 他のリソースもここに追加できます
+	useZundamon: false,
 };
 
 // フリー素材

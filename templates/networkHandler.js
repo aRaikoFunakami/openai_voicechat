@@ -41,7 +41,7 @@ class NetworkHandler {
 		}
 		this.updateAnswerHandler(text, false);
 
-		if (this.lang == 'ja-JP') {
+		if (this.lang == 'ja-JP' && useZundamon) {
 			this.speechHandlerZundamon.speak(text, finish === "stop", this.lang);
 			this.speechHandlerZundamon.speechEndHandler = function(isStop) {
 				this.isProcessing = !isStop;

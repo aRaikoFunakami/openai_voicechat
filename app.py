@@ -85,5 +85,6 @@ def index():
     return render_template('index.html')
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s:%(filename)s:%(funcName)s - %(message)s")
-app.run(host='0.0.0.0', port=8001, debug=True, ssl_context=('openssl/server.crt', 'openssl/server.key'))
+app.run(host='0.0.0.0', port=8080, debug=True)
+#app.run(host='0.0.0.0', port=8001, debug=True, ssl_context=('openssl/server.crt', 'openssl/server.key'))
 #app.run(host='0.0.0.0', port=443, debug=True, ssl_context=('openssl/server.crt', 'openssl/server.key'))

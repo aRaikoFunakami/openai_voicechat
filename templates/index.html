@@ -52,8 +52,11 @@
 	</div>
 	<script>
 		// Unable to get CSS when connecting to HTTPS with self-signed server certificate
+		// HTTPS
 		//fetch('https://k230703-03.tok.access-company.com/styles.css')
-		fetch('https://k230703-03.tok.access-company.com:8001/styles.css')
+		//fetch('https://k230703-03.tok.access-company.com:8001/styles.css')
+		// HTTP
+		fetch('http://localhost:8080/styles.css')
 			.then(response => response.text())
 			.then(css => {
 				var style = document.createElement('style');
