@@ -84,6 +84,8 @@ class SpeechRecognitionHandler {
 			this.updateStatusHandler("音声認識中です...", 3);
 		} else if (this.recognition.lang === "zh-CN") {
 			this.updateStatusHandler("语音识别正在进行中...", 3);
+		} else {
+			this.updateStatusHandler("Voice recognition...", 3);
 		}
 
 		this.recognition.start();

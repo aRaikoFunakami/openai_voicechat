@@ -13,6 +13,7 @@ ISO639 = {
     'ja': 'Japanese',
     'en': 'English',
     'zh': 'Chinese',
+    'ko': 'Korean',
 }
 defualt_language = 'English'
 

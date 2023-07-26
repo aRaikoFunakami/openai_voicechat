@@ -130,6 +130,10 @@ document.addEventListener("DOMContentLoaded", function () {
 			lang = 'zh-CN';
 			updateStatus('Language:' + lang, 2);
 		}
+		else if (e.code === 'KeyK') {
+			lang = 'ko-KR';
+			updateStatus('Language:' + lang, 2);
+		}
 	});
 
 	//
