@@ -14,3 +14,7 @@ CMD ["python3", "/app/app.py"]
 # LOCAL
 #
 EXPOSE 8080
+#
+# $ docker image build -t flask .
+# $ docker container run -p 8080:8080 -v ${PWD}/.:/app -d flask
+#
