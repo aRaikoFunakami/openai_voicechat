@@ -1,5 +1,5 @@
 // HTTP
-const server = 'http://localhost:8080';
+const server = 'http://127.0.0.1:8080';
 
 // HTTPS
 //const server = 'https://k230703-03.tok.access-company.com:8001';
