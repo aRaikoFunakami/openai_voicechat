@@ -37,6 +37,7 @@ class SpeechRecognitionHandler {
 			this.isProcessing = false;
 			video.muted = false;
 			this.stopProcessing();
+			this.updateStatusHandler(`recognition error, ${event.error}`, 2);
 		});
 
 		this.recognition.addEventListener("result", (event) => {
@@ -55,7 +56,9 @@ class SpeechRecognitionHandler {
 				}
 			}
 			this.recognizedText = text;
-			this.updateStatusHandler(text, 2);
+			if(this.isProcessing){
+				this.updateStatusHandler(text, 2);
+			}
 
 			if(this.recognizedText.length > 0 && is_final && this.isProcessing){
 				this.recognizedHandler(this.recognizedText);
@@ -79,13 +82,13 @@ class SpeechRecognitionHandler {
 
 		this.recognition.lang = lang;
 		if (this.recognition.lang === "en-US") {
-			this.updateStatusHandler("Voice recognition...", 3);
+			this.updateStatusHandler("Voice recognition...", 100);
 		} else if (this.recognition.lang === "ja-JP") {
-			this.updateStatusHandler("音声認識中です...", 3);
+			this.updateStatusHandler("音声認識中です...", 100);
 		} else if (this.recognition.lang === "zh-CN") {
-			this.updateStatusHandler("语音识别正在进行中...", 3);
+			this.updateStatusHandler("语音识别正在进行中...", 100);
 		} else {
-			this.updateStatusHandler("Voice recognition...", 3);
+			this.updateStatusHandler("Voice recognition...", 100);
 		}
 
 		this.recognition.start();
