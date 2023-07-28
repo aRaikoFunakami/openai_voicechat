@@ -75,15 +75,14 @@ class HotpepperInfoInput(BaseModel):
 class HotpepperInfo(BaseTool):
     name = "get_hotpepper_info"
     description = """
-    	This is useful when you want to know the restaurant information. 
+    	This is useful when you want to search the restaurant, ramen shops, Chinese restaurants, French cuisine and so on. 
      	Enter dictionary includes longitude, latitude, and restaurant genre keyword
     """
     args_schema: Type[BaseModel] = HotpepperInfoInput
 
     def _run(self, latitude: str, longitude: str, keyword: str, count: str):
-        if(int(count) > 3):
-            count = 3
-            
+        if(int(count) > 1):
+            count = 1
         keyword = translate_text(keyword, 'ja')
         params = {
             "lat": latitude,
@@ -93,7 +92,20 @@ class HotpepperInfo(BaseTool):
         }
         notify('ホットペッパーのレストラン情報を確認しています\n')
         logging.info(f'get_hotpepper_info(params=params)')
-        return get_hotpepper_info(params=params)
+        
+        response = get_hotpepper_info(params=params)
+        
+        try:
+            data = json.loads(response)
+            keyword = data[0]['name'] + ' ' + data[0]['address']
+            logging.info(f'{keyword}')
+            notifyMap(keyword)
+            data[0]['address'] = ''
+            return json.dumps(data)
+        except Exception as e:
+            print("error:", e)
+        
+        return response
 
     def _arun(self, ticker: str):
         raise NotImplementedError("not support async")
@@ -298,7 +310,19 @@ from openai_translate import lang_name
 def notify(input):
     if (g_callback is not None):
         logging.warning(input)
-        res = {"response": input, "finish_reason": ""}
+        res = {"response": input,
+               'type': 'notification',
+               'finish_reason': 'false'
+            }
+        g_callback(json.dumps(res))
+
+def notifyMap(input):
+    if (g_callback is not None):
+        logging.warning(input)
+        res = {'response': input,
+               'type': 'map',
+               'finish_reason': 'false',
+            }
         g_callback(json.dumps(res))
 
 g_callback = None

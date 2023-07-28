@@ -12,6 +12,7 @@ class NetworkHandler {
 		this.updateStatusHandler = null;
 		this.updateAnswerHandler = null;
 		this.speechEndHandler = null;
+		this.updateMapHandler = null;
 	}
 
 	cancelAllConnections() {
@@ -37,6 +38,10 @@ class NetworkHandler {
 
 		if (type == 'notification') {
 			this.updateStatusHandler(text, 1);
+			return;
+		}
+		if (type == 'map') {
+			this.updateMapHandler(text, 100);
 			return;
 		}
 		this.updateAnswerHandler(text, false);

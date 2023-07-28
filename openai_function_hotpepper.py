@@ -25,7 +25,8 @@ def filtered_response(data, filter):
 
 
 default_filter = ["name",
-#            "access",
+            "access",
+            "address",
 #           "card",
         "catch",
         "genre",

@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	networkHandler.updateStatusHandler = updateStatus;
 	networkHandler.updateAnswerHandler = updateAnswer;
 	networkHandler.speechEndHandler = updateAnswer;
+	networkHandler.updateMapHandler = updateMap;
 
 	const speechRecognitionHandler = new SpeechRecognitionHandler();
 	speechRecognitionHandler.initializeRecognition(); //あとでこれ呼ばなくても良いように変更する
@@ -52,20 +53,41 @@ document.addEventListener("DOMContentLoaded", function () {
 		}, displayTime * 1000);
 	}
 
+	let timeoutHandle_updateMap = null;
+	function updateMap(text, displayTime = 1) {
+		console.log(`update map: ${text}`);
+		const mapElement = document.getElementById('map');
+		mapElement.onload = function () {
+			mapElement.style.display = "block";
+		};
+		clearTimeout(timeoutHandle_updateMap); // 前回の非表示処理をキャンセル
+
+		// src="https://maps.google.com/maps?output=embed&q=横浜らーめん 一本家&t=m&hl=ja&z=18"
+		mapElement.src = 'https://maps.google.com/maps?output=embed&q=' + encodeURI(text) + '&t=m&hl=ja&z=18';
+		
+		timeoutHandle_updateMap = setTimeout(function () {
+			mapElement.style.display = "none";
+		}, displayTime * 1000);
+	}
+	function hideMap(){
+		const mapElement = document.getElementById('map');
+		mapElement.style.display = 'none';
+	}
+
 	// answer area
 	let answer_text = '';
 	const converter = new showdown.Converter();
 	function updateAnswer(text, isStop) {
 		const answerElement = document.getElementById('answer');
 		const answertextElement = document.getElementById('answer_text');
-		console.log(`updateAnswer ${text}, ${isStop}`)
-		if(isStop){
+		console.log(`updateAnswer ${text}, ${isStop}`);
+		if (isStop) {
 			answertextElement.innerHTML = '';
 			answerElement.style.display = "none";
 			answer_text = '';
-		}else{
+		} else {
 			answer_text = answer_text + text;
-			answertextElement.innerHTML =converter.makeHtml(answer_text);
+			answertextElement.innerHTML = converter.makeHtml(answer_text);
 			answertextElement.scrollTop = answertextElement.scrollHeight;
 			answerElement.style.display = "flex";
 		}
@@ -81,8 +103,11 @@ document.addEventListener("DOMContentLoaded", function () {
 			networkHandler.cancelAllConnections();
 			speechRecognitionHandler.stopProcessing();
 			updateAnswer('', true);
+			// want to remain map element
+			// hideMap();
 			return;
 		}
+		hideMap();
 		speechRecognitionHandler.startProcessing(lang);
 	});
 
@@ -113,8 +138,11 @@ document.addEventListener("DOMContentLoaded", function () {
 				networkHandler.cancelAllConnections();
 				speechRecognitionHandler.stopProcessing();
 				updateAnswer('', true);
+				// want to remain map element
+				// hideMap();
 				return;
 			}
+			hideMap();
 			speechRecognitionHandler.startProcessing(lang);
 		}
 		else if (e.code === 'KeyE') {
@@ -194,6 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		console.log('speechRecognitionHandler.recognizedHandler ');
 		networkHandler.setupEventSource(text, lang);
 	}
+
 });
 
 
