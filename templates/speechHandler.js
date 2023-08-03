@@ -32,7 +32,9 @@ class SpeechHandler {
 	constructor() {
 		this.utterances = [];
 		this.text = "";
-		this.delimiters = [',', '.', '!', ':', ';', '?', '{', '}', '[', ']', '！', '？', '：', '；', '　', '。', '、',];
+		this.delimitersDefault = [',', '.', '!', ':', ';', '?', '{', '}', '[', ']', '！', '？', '：', '；', '　', '。', '、',];
+		this.delimitersJa = ['「', '」', '！', '？', '：', '；', '　', '。', '、',];
+		this.delimiters = this.delimitersDefault;
 
 		// Handler
 		this.speechEndHandler = null;
@@ -66,12 +68,17 @@ class SpeechHandler {
 		if (lang == 'en-US') {
 			utterance.voice = voices[145]; // en-US:Google US English Female
 			utterance.rate = 0.9;
+			this.delimiter = this.delimitersDefault;
 		} else if (lang == 'zh-CN') {
 			utterance.voice = voices[169]; // zh-CN: Google 普通話
 			utterance.rate = 0.9;
+			this.delimiters = this.delimitersDefault;
 		} else if (lang == 'ko-KR') {
 			utterance.voice = voices[155];
 			utterance.rate = 1.0;
+			this.delimiters = this.delimitersDefault;
+		} else if (lang == 'ja-JP'){
+			this.delimiters = this.delimitersJa;
 		}
 		this.utterances.push(utterance);
 		speechSynthesis.speak(utterance);

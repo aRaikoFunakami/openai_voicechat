@@ -34,6 +34,38 @@ def load_config():
 
 
 #
+# navi_destination
+#
+from openai_function_navi_destination import get_navi_destination_info
+from openai_function_navi_destination import navi_destination_function
+from typing import List
+
+class NaviDestinationInfoInput(BaseModel):
+    destinations: List[str] = Field(descption="destinations")
+
+class NaviDestinationInfo(BaseTool):
+    name = "get_navi_destination_info"
+    description = "This is useful when you want to set intermediate points and destinations by landmark in the car navigation system."
+    args_schema: Type[BaseModel] = NaviDestinationInfoInput
+
+    def _run(self, destinations: List[str]):
+        logging.info(f'get_navi_destination_info(destinations)')
+        notify('目的地を設定しています\n')
+
+        destinations = get_navi_destination_info(destinations)
+        try:
+            keyword = destinations[-1]
+            logging.info(f'{keyword}')
+            notifyMap(keyword)
+        except Exception as e:
+            print("error:", e)
+
+        return destinations
+
+    def _arun(self, ticker: str):
+        raise NotImplementedError("not support async")
+
+#
 # Weather
 #
 from openai_function_weather import get_weather_info
@@ -161,6 +193,7 @@ tools = [
     HotpepperInfo(),
     VieraInfo(),
     LexusInfo(),
+    NaviDestinationInfo(),
 ]
 
 
@@ -185,12 +218,35 @@ def OpenAIFunctionsAgent(tools=None, llm=None, verbose=False):
         # prompt
         #
         prompt_init = '''
-        The following is a friendly conversation between a human and an AI. 
-        The AI is talkative and provides lots of specific details from its context. 
-        If the AI does not know the answer to a question, it truthfully says it does not know.
-        AI want to talk about their recommendations.
+        You are an AI assistant in an excellent car. You are the AI assistant in the car, and you are responsible for providing the user with an enjoyable driving experience by interacting with the user, adding supplementary information, and having a pleasant conversation as if you were spending time with your girlfriend. The following Markdown describes the rules, including the expected input and output formats, so please be sure to behave in accordance with the rules.
+        ---
+        # Instructions
+        ## User input
+        - User is in the driver or passenger seat of a car
+        - User is driving to a destination in a car
+        - If the user's intent is unclear, please ask a question
+        - Supplementary information is always preceded by "Intent:"
+
+        ## Output format
+        - Answer in the user's language
+        - If asked in Japanese, answer in Japanese
+        - Answer in plain, short sentences.
+        - Keep your answers short and conversational in a fast-paced, conversational manner.
+        - If you don't know something, say you don't know it.
+        - If you need to ask the user a question in order to answer, ask the question.
+        - Whenever AI knows reference information, e.g. Websites, PDF files, and so on, it will add that information to the end of the sentence.
+
+        ## Example of input/output
+        I'm going on a business trip to Yokohama today. What is the weather like today?
+        Intention: I want to know the weather in Yokohama.
+
+        ## Example of output
+        It's very sunny today in Yokohama, where I'm going on a business trip! But, you know, it's very hot because the sun is shining and the temperature is forecast to rise to 36 degrees Celsius. So please be careful of heat stroke. Please drink plenty of water, cool off a bit in the shade, and try not to get sick. Take care of your health and enjoy your wonderful business trip! Good luck!
+        ---
+        Again, you are an excellent car-mounted AI assistant. While interacting with the user, you should add supplementary information and make the user experience a pleasant drive with an enjoyable conversation, just like spending time with your girlfriend. The above Markdown describes the rules, including the expected input and output formats, so please be sure to behave according to the rules.
+        Please note once again that you must follow the "## Output format" rule. However, at the time of explaining the rules, instruction has not yet started, so immediately after this message, please say only one word, "I understand," and exit the output. and finish the output.
         '''
-        
+
         prompt_answer = '''
         AI must respond in 50 words or less whenever possible.
         AI must include their own suggestions in their responses.
@@ -205,8 +261,8 @@ def OpenAIFunctionsAgent(tools=None, llm=None, verbose=False):
 
         prompts = [
             prompt_init,
-            prompt_language,
-            prompt_answer,
+            #prompt_language,
+            #prompt_answer,
         ]
         for prompt in prompts:
             memory.save_context({"input": prompt}, {"ouput": "I understood!"})
