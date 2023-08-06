@@ -30,19 +30,25 @@ default_persist_directory = "./chroma_viera"
 # html
 pdf_baseurl = "http://127.0.0.1:8080"
 pdf_titles = {
-    "th_75_65_55lx950_em.pdf": {"title": "操作ガイド", "url": ""},
-    "th_75_65_55lx950.pdf": {"title": "取扱説明書", "url": ""},
+    "th_75_65_55lx950_em.pdf": {
+        "title": "操作ガイド",
+        "url": f"{pdf_baseurl}/th_75_65_55lx950_em.pdf",
+    },
+    "th_75_65_55lx950.pdf": {
+        "title": "取扱説明書",
+        "url": f"{pdf_baseurl}/th_75_65_55lx950.pdf",
+    },
     "NX350-NX250_MM_JP_M78364N_1_2303.pdf": {
         "title": "マルチメディア取扱説明書",
-        "url": f"{pdf_baseurl}/NX350-NX250_MM_JP_M78364N_1_2303.html",
+        "url": f"{pdf_baseurl}/NX350-NX250_MM_JP_M78364N_1_2303.pdf",
     },
     "NX350-NX250_OM_JP_M78364V_1_2303.pdf": {
         "title": "取扱説明書",
-        "url": f"{pdf_baseurl}/NX350-NX250_OM_JP_M78364V_1_2303.html",
+        "url": f"{pdf_baseurl}/NX350-NX250_OM_JP_M78364V_1_2303.pdf",
     },
     "NX350-NX250_UG_JP_M78364_1_2303.pdf": {
         "title": "ユーザーガイド",
-        "url": f"{pdf_baseurl}/NX350-NX250_UG_JP_M78364_1_2303.html",
+        "url": f"{pdf_baseurl}/NX350-NX250_UG_JP_M78364_1_2303.pdf",
     },
 }
 
@@ -65,7 +71,7 @@ def source_urls(docs):
         source = doc.metadata.get("source")
         for key in pdf_titles.keys():
             if key in source:
-                url = pdf_titles[key]["url"] + "#fp" + hex(page)[2:]
+                url = pdf_titles[key]["url"] + "#page=" + str(page) + "&view=Fit"
                 urls.append(url)
     return urls
 
