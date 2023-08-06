@@ -160,7 +160,7 @@ class PDFInfoInput(BaseModel):
 class LexusInfo(BaseTool):
     name = "get_pdf_lexus_info"
     description = """
-    	This is useful when you want to Explanation of all the car's equipment including options, explanation of the functions of the car navigation system, and handling of the multimedia installed in the car.
+    	This is useful if you want to know how to use all of the car's equipment, how to use the car navigation system, or how to use the multimedia installed in the car.
      	Enter query.
     """
     args_schema: Type[BaseModel] = PDFInfoInput
@@ -187,7 +187,9 @@ class VieraInfo(BaseTool):
     def _run(self, query: str):
         notify("取扱説明書を確認しています\n")
         logging.info(f"get_pdf_viera_info(query)")
-        return get_pdf_viera_info(query)
+        response = get_pdf_viera_info(query)
+        notifyUrl(response.get("urls")[0])
+        return json.dumps(response.get("content"), indent=2, ensure_ascii=False)
 
     def _arun(self, ticker: str):
         raise NotImplementedError("not support async")
