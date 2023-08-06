@@ -40,8 +40,10 @@ from openai_function_navi_destination import get_navi_destination_info
 from openai_function_navi_destination import navi_destination_function
 from typing import List
 
+
 class NaviDestinationInfoInput(BaseModel):
     destinations: List[str] = Field(descption="destinations")
+
 
 class NaviDestinationInfo(BaseTool):
     name = "get_navi_destination_info"
@@ -49,13 +51,13 @@ class NaviDestinationInfo(BaseTool):
     args_schema: Type[BaseModel] = NaviDestinationInfoInput
 
     def _run(self, destinations: List[str]):
-        logging.info(f'get_navi_destination_info(destinations)')
-        notify('目的地を設定しています\n')
+        logging.info(f"get_navi_destination_info(destinations)")
+        notify("目的地を設定しています\n")
 
         destinations = get_navi_destination_info(destinations)
         try:
             keyword = destinations[-1]
-            logging.info(f'{keyword}')
+            logging.info(f"{keyword}")
             notifyMap(keyword)
         except Exception as e:
             print("error:", e)
@@ -64,6 +66,7 @@ class NaviDestinationInfo(BaseTool):
 
     def _arun(self, ticker: str):
         raise NotImplementedError("not support async")
+
 
 #
 # Weather
@@ -83,8 +86,8 @@ class WeatherInfo(BaseTool):
     args_schema: Type[BaseModel] = WeatherInfoInput
 
     def _run(self, latitude: int, longitude: int):
-        logging.info(f'get_weather_info(latitude, longitude)')
-        notify('気象情報データを確認しています\n')
+        logging.info(f"get_weather_info(latitude, longitude)")
+        notify("気象情報データを確認しています\n")
         return get_weather_info(latitude, longitude)
 
     def _arun(self, ticker: str):
@@ -113,30 +116,30 @@ class HotpepperInfo(BaseTool):
     args_schema: Type[BaseModel] = HotpepperInfoInput
 
     def _run(self, latitude: str, longitude: str, keyword: str, count: str):
-        if(int(count) > 1):
+        if int(count) > 1:
             count = 1
-        keyword = translate_text(keyword, 'ja')
+        keyword = translate_text(keyword, "ja")
         params = {
             "lat": latitude,
             "lng": longitude,
             "keyword": keyword,
             "count": count,
         }
-        notify('ホットペッパーのレストラン情報を確認しています\n')
-        logging.info(f'get_hotpepper_info(params=params)')
-        
+        notify("ホットペッパーのレストラン情報を確認しています\n")
+        logging.info(f"get_hotpepper_info(params=params)")
+
         response = get_hotpepper_info(params=params)
-        
+
         try:
             data = json.loads(response)
-            keyword = data[0]['name'] + ' ' + data[0]['address']
-            logging.info(f'{keyword}')
+            keyword = data[0]["name"] + " " + data[0]["address"]
+            logging.info(f"{keyword}")
             notifyMap(keyword)
-            data[0]['address'] = ''
+            data[0]["address"] = ""
             return json.dumps(data)
         except Exception as e:
             print("error:", e)
-        
+
         return response
 
     def _arun(self, ticker: str):
@@ -163,9 +166,11 @@ class LexusInfo(BaseTool):
     args_schema: Type[BaseModel] = PDFInfoInput
 
     def _run(self, query: str):
-        notify('取扱説明書を確認しています\n')
-        logging.info(f'get_pdf_lexus_info(query)')
-        return get_pdf_lexus_info(query)
+        notify("取扱説明書を確認しています\n")
+        logging.info(f"get_pdf_lexus_info(query)")
+        response = get_pdf_lexus_info(query)
+        notifyUrl(response.get("urls")[0])
+        return json.dumps(response.get("content"), indent=2, ensure_ascii=False)
 
     def _arun(self, ticker: str):
         raise NotImplementedError("not support async")
@@ -180,8 +185,8 @@ class VieraInfo(BaseTool):
     args_schema: Type[BaseModel] = PDFInfoInput
 
     def _run(self, query: str):
-        notify('取扱説明書を確認しています\n')
-        logging.info(f'get_pdf_viera_info(query)')
+        notify("取扱説明書を確認しています\n")
+        logging.info(f"get_pdf_viera_info(query)")
         return get_pdf_viera_info(query)
 
     def _arun(self, ticker: str):
@@ -197,11 +202,11 @@ tools = [
 ]
 
 
-
 #
 # Ugh!
 #
 memory = None
+
 
 def OpenAIFunctionsAgent(tools=None, llm=None, verbose=False):
     agent_kwargs = {
@@ -211,13 +216,13 @@ def OpenAIFunctionsAgent(tools=None, llm=None, verbose=False):
     # Ugh!
     #
     global memory
-    if(memory is None):
+    if memory is None:
         memory = ConversationBufferMemory(memory_key="memory", return_messages=True)
         # Add the user's prompt to the memory if need
         #
         # prompt
         #
-        prompt_init = '''
+        prompt_init = """
         You are an AI assistant in an excellent car. You are the AI assistant in the car, and you are responsible for providing the user with an enjoyable driving experience by interacting with the user, adding supplementary information, and having a pleasant conversation as if you were spending time with your girlfriend. The following Markdown describes the rules, including the expected input and output formats, so please be sure to behave in accordance with the rules.
         ---
         # Instructions
@@ -245,28 +250,27 @@ def OpenAIFunctionsAgent(tools=None, llm=None, verbose=False):
         ---
         Again, you are an excellent car-mounted AI assistant. While interacting with the user, you should add supplementary information and make the user experience a pleasant drive with an enjoyable conversation, just like spending time with your girlfriend. The above Markdown describes the rules, including the expected input and output formats, so please be sure to behave according to the rules.
         Please note once again that you must follow the "## Output format" rule. However, at the time of explaining the rules, instruction has not yet started, so immediately after this message, please say only one word, "I understand," and exit the output. and finish the output.
-        '''
+        """
 
-        prompt_answer = '''
+        prompt_answer = """
         AI must respond in 50 words or less whenever possible.
         AI must include their own suggestions in their responses.
         The AI will include witty and fun topics in its responses.
         Whenever AI has reference information, it will add that information to the end of the sentence.
-        '''
+        """
 
-        prompt_language = '''
+        prompt_language = """
         AThe AI will respond in the same language as it recognized. 
         For example, if the AI understands that the input sentence is in English, it outputs the sentence in English.
-        '''
+        """
 
         prompts = [
             prompt_init,
-            #prompt_language,
-            #prompt_answer,
+            # prompt_language,
+            # prompt_answer,
         ]
         for prompt in prompts:
             memory.save_context({"input": prompt}, {"ouput": "I understood!"})
-
 
     return initialize_agent(
         tools=tools,
@@ -345,15 +349,12 @@ class MyCustomCallbackHandler(BaseCallbackHandler):
 
     def on_text(self, text: str, **kwargs: Any) -> Any:
         """Run on arbitrary text."""
-				
+
     def on_agent_action(self, action: AgentAction, **kwargs: Any) -> Any:
         """Run on agent action."""
 
-
     def on_agent_finish(self, finish: AgentFinish, **kwargs: Any) -> Any:
         """Run on agent end."""
-
-
 
 
 #
@@ -363,26 +364,35 @@ import langid
 from openai_translate import translate_text
 from openai_translate import lang_name
 
+
 def notify(input):
-    if (g_callback is not None):
+    if g_callback is not None:
         logging.warning(input)
-        res = {"response": input,
-               'type': 'notification',
-               'finish_reason': 'false'
-            }
+        res = {"response": input, "type": "notification", "finish_reason": "false"}
         g_callback(json.dumps(res))
 
-def notifyMap(input):
-    if (g_callback is not None):
-        logging.warning(input)
-        res = {'response': input,
-               'type': 'map',
-               'finish_reason': 'false',
-            }
+
+def notifyUrl(url):
+    if g_callback is not None:
+        logging.warning(url)
+        res = {"response": url, "type": "url", "finish_reason": "false"}
         g_callback(json.dumps(res))
+
+
+def notifyMap(input):
+    if g_callback is not None:
+        logging.warning(input)
+        res = {
+            "response": input,
+            "type": "map",
+            "finish_reason": "false",
+        }
+        g_callback(json.dumps(res))
+
 
 g_callback = None
 g_lang = None
+
 
 def chat(input, callback=None):
     logging.info("chatstart")
@@ -391,7 +401,7 @@ def chat(input, callback=None):
     global g_callback, g_lang
     g_callback = callback
     g_lang = langid.classify(input)[0]
-    
+
     callback_manager = CallbackManager([MyCustomCallbackHandler(callback)])
     llm = ChatOpenAI(
         temperature=0,
@@ -401,10 +411,10 @@ def chat(input, callback=None):
     )
     agent_chain = OpenAIFunctionsAgent(tools=tools, llm=llm, verbose=True)
 
-    suffix = f'AI must respond in {lang_name(g_lang)}.'
-    input = input + ' ' + suffix
+    suffix = f"AI must respond in {lang_name(g_lang)}."
+    input = input + " " + suffix
     logging.warning(input)
-    
+
     response = agent_chain.run(input=input)
     cprint(f"response: {response}")
     g_callback = None
@@ -452,11 +462,16 @@ def dummy_callback(input):
 def test_langchain_support():
     load_config()
     callback_manager = CallbackManager([MyCustomCallbackHandler(dummy_callback)])
-    llm = ChatOpenAI(temperature=0, model=model_name, callback_manager=callback_manager, streaming=False)
+    llm = ChatOpenAI(
+        temperature=0,
+        model=model_name,
+        callback_manager=callback_manager,
+        streaming=False,
+    )
     # llm = ChatOpenAI(temperature=0, model=model_name)
     agent_chain = OpenAIFunctionsAgent(tools=tools, llm=llm, verbose=True)
     for query in queries:
-        input = query[0] 
+        input = query[0]
         response = agent_chain.run(input=input)
         cprint(f"response: {response}")
 

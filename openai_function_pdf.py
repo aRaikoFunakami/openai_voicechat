@@ -10,63 +10,101 @@ from langchain.chains import ConversationalRetrievalChain
 import markdown
 
 
-'''
+"""
 langchainのConversationalRetrievalChain.from_llmを利用する場合にはgpt-4でないと良い回答が得られない
-'''
+"""
 model_name = "gpt-3.5-turbo-0613"
-#model_name = "gpt-4-0613"
+# model_name = "gpt-4-0613"
 
 # default_persist_directory = "./chroma_split_documents"
 # default_persist_directory = "./chroma_load_and_split"
 default_persist_directory = "./chroma_viera"
 
+# TODO
+# - pdf の URL をget_pdf_info で返すようにする
+# - langchain 側でそのURLをクライアントに返す
+# {
+#    '...pdf': {'title':'説明', 'url':'URL'},
+#    '...pdf': ...,
+# }
+# html
+pdf_baseurl = "http://127.0.0.1:8080"
 pdf_titles = {
-    'th_75_65_55lx950_em.pdf': '操作ガイド',
-    'th_75_65_55lx950.pdf': '取扱説明書',
-    'NX350-NX250_MM_JP_M78364N_1_2303.pdf':'マルチメディア取扱説明書',
-    'NX350-NX250_OM_JP_M78364V_1_2303.pdf':'取扱説明書',
-    'NX350-NX250_UG_JP_M78364_1_2303.pdf':'ユーザーガイド',
+    "th_75_65_55lx950_em.pdf": {"title": "操作ガイド", "url": ""},
+    "th_75_65_55lx950.pdf": {"title": "取扱説明書", "url": ""},
+    "NX350-NX250_MM_JP_M78364N_1_2303.pdf": {
+        "title": "マルチメディア取扱説明書",
+        "url": f"{pdf_baseurl}/NX350-NX250_MM_JP_M78364N_1_2303.html",
+    },
+    "NX350-NX250_OM_JP_M78364V_1_2303.pdf": {
+        "title": "取扱説明書",
+        "url": f"{pdf_baseurl}/NX350-NX250_OM_JP_M78364V_1_2303.html",
+    },
+    "NX350-NX250_UG_JP_M78364_1_2303.pdf": {
+        "title": "ユーザーガイド",
+        "url": f"{pdf_baseurl}/NX350-NX250_UG_JP_M78364_1_2303.html",
+    },
 }
+
 
 # load config
 def load_config():
     config_file = os.path.dirname(__file__) + "/config.json"
     config = None
-    with open(config_file, 'r') as file:
+    with open(config_file, "r") as file:
         config = json.load(file)
     return config
+
+
+def source_urls(docs):
+    urls = []
+    for doc in docs:
+        # page should be +1 because of start page is 0
+        page = doc.metadata["page"] + 1
+        # source pdf file to Subject
+        source = doc.metadata.get("source")
+        for key in pdf_titles.keys():
+            if key in source:
+                url = pdf_titles[key]["url"] + "#fp" + hex(page)[2:]
+                urls.append(url)
+    return urls
+
 
 def source_string(docs):
     result = {}
     for doc in docs:
-        # page should be +1 because of start page is 0
-        doc.metadata['page'] = doc.metadata['page'] + 1
         # source pdf file to Subject
-        source = doc.metadata.get('source')
+        source = doc.metadata.get("source")
         for key in pdf_titles.keys():
             if key in source:
-                doc.metadata['source'] = pdf_titles[key]
+                # doc.metadata['source'] = pdf_titles[key]['title']
+                source = pdf_titles[key]["title"]
+                # page should be +1 because of start page is 0
+                page = doc.metadata["page"] + 1
         # summarize the reference page with the title of the pdf
-        page = doc.metadata['page']
-        source = doc.metadata.get('source')
+        # page = doc.metadata['page']
+        # source = doc.metadata.get('source')
         if source not in result:
             result[source] = []
 
         result[source].append(page)
     # to string
-    response = ''
+    response = ""
     for source, pages in result.items():
-        response = response + f"{source} page.{', '.join(map(str, pages))}" + '\n'
+        response = response + f"{source} page.{', '.join(map(str, pages))}" + "\n"
     return response
 
+
 get_pdf_info_cache_memory = {}
+
+
 #
 # call by openai functional calling
 #
-def get_pdf_info(query, persist_directory = default_persist_directory):
+def get_pdf_info(query, persist_directory=default_persist_directory):
     logging.info("%s, %s", query, persist_directory)
     # very simple cache
-    if(get_pdf_info_cache_memory.get(query) is not None):
+    if get_pdf_info_cache_memory.get(query) is not None:
         logging.info("Hit the cache: %s", query)
         return get_pdf_info_cache_memory[query]
     # initialize OpenAI API
@@ -75,25 +113,35 @@ def get_pdf_info(query, persist_directory = default_persist_directory):
     os.environ["OPENAI_API_KEY"] = openai.api_key
     # vectorsearching with query
     embeddings = OpenAIEmbeddings()
-    vectorstore = Chroma(embedding_function=embeddings,
-                         persist_directory=persist_directory)
+    vectorstore = Chroma(
+        embedding_function=embeddings, persist_directory=persist_directory
+    )
     # 参照するPDFファイルが日本語のため相性を合わせる
     chat_history = []
-    llm = ChatOpenAI(temperature=0, model_name = model_name)
-    pdf_qa = ConversationalRetrievalChain.from_llm(llm, vectorstore.as_retriever(), return_source_documents=True)
+    llm = ChatOpenAI(temperature=0, model_name=model_name)
+    pdf_qa = ConversationalRetrievalChain.from_llm(
+        llm, vectorstore.as_retriever(), return_source_documents=True
+    )
     result = pdf_qa({"question": query, "chat_history": chat_history})
-    response = result["answer"] + '\n\n' + source_string(result['source_documents'])
-    logging.info("%s", response, )
+    # response = result["answer"] + '\n\n' + source_string(result['source_documents'])
+    response = {
+        "content": result["answer"]
+        + "\n\n"
+        + source_string(result["source_documents"]),
+        "urls": source_urls(result["source_documents"]),
+    }
+    # response = json.dumps(response, indent=2, ensure_ascii=False)
+    logging.info("type: %s, %s", type(response), response)
     get_pdf_info_cache_memory[query] = response
     return response
 
 
-    
 #
 # call by openai functional calling
 #
-def get_pdf_lexus_info(query, persist_directory = './chroma_lexus'):
+def get_pdf_lexus_info(query, persist_directory="./chroma_lexus"):
     return get_pdf_info(query, persist_directory)
+
 
 pdf_lexus_function = {
     "name": "get_pdf_lexus_info",
@@ -110,8 +158,10 @@ pdf_lexus_function = {
     },
 }
 
-def get_pdf_viera_info(query, persist_directory = './chroma_viera'):
+
+def get_pdf_viera_info(query, persist_directory="./chroma_viera"):
     return get_pdf_info(query, persist_directory)
+
 
 pdf_viera_function = {
     "name": "get_pdf_viera_info",
@@ -133,6 +183,7 @@ pdf_viera_function = {
 # Test codes: Verify that the registered function call is called as expected
 #
 #
+
 
 def call_defined_function(message):
     function_name = message["function_call"]["name"]
@@ -173,13 +224,14 @@ def non_streaming_chat(text):
         return "chatgpt"
 
 
-template = '''
+template = """
 条件:
 - 50文字以内で回答せよ
 
 入力文:
 {}
-'''
+"""
+
 
 def chat(text):
     logging.debug(f"chatstart:{text}")
@@ -188,25 +240,39 @@ def chat(text):
     q = template.format(text)
     return non_streaming_chat(q)
 
+
 queries1 = [
     ["カーナビでYouTubeを見たい", "get_pdf_info"],
     ["I want to watch YouTube on my car navigation system.", "get_pdf_info"],
     ["カーナビのWebブラウザでYouTubeを閲覧したいです。", "get_pdf_info"],
-    ["I would like to browse YouTube on the car navigation system's web browser.", "get_pdf_info"],
+    [
+        "I would like to browse YouTube on the car navigation system's web browser.",
+        "get_pdf_info",
+    ],
     ["カーナビでのYouTube閲覧方法を教えてください。", "get_pdf_info"],
-    ["Could you please explain how to browse YouTube on the car navigation system?", "get_pdf_info"],
+    [
+        "Could you please explain how to browse YouTube on the car navigation system?",
+        "get_pdf_info",
+    ],
     ["カーナビのWebブラウザ機能を使ってYouTubeを視聴したいです。", "get_pdf_info"],
-    ["I want to use the web browser feature on my car navigation system to watch YouTube.", "get_pdf_info"],
+    [
+        "I want to use the web browser feature on my car navigation system to watch YouTube.",
+        "get_pdf_info",
+    ],
     ["カーナビでYouTubeを見る手順を教えてください。", "get_pdf_info"],
-    ["Can you provide instructions on how to watch YouTube on the car navigation system?", "get_pdf_info"]
+    [
+        "Can you provide instructions on how to watch YouTube on the car navigation system?",
+        "get_pdf_info",
+    ],
 ]
 
 queries = [
     ["カーナビのルートを設定したい", "get_pdf_lexus_info"],
-#    ["What is the procedure for watching YouTube on a car navigation system?", "get_pdf_lexus_info"],
-#    ['ビエラでハイブリッドキャストの設定の仕方を教えて', "get_pdf_viera_info"],
-#    ['How do I set up hybrid cast on my Viera?', "get_pdf_viera_info"],
+    #    ["What is the procedure for watching YouTube on a car navigation system?", "get_pdf_lexus_info"],
+    #    ['ビエラでハイブリッドキャストの設定の仕方を教えて', "get_pdf_viera_info"],
+    #    ['How do I set up hybrid cast on my Viera?', "get_pdf_viera_info"],
 ]
+
 
 def main():
     logging.basicConfig(
@@ -217,5 +283,6 @@ def main():
         response = chat(query[0])
         print(f"[{query[1] == response}] 期待:{query[1]}, 実際:{response}, 質問:{query[0]}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

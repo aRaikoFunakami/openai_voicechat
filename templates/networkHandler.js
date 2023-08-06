@@ -13,11 +13,12 @@ class NetworkHandler {
 		this.updateAnswerHandler = null;
 		this.speechEndHandler = null;
 		this.updateMapHandler = null;
+		this.updateUrlHandler = null;
 	}
 
 	cancelAllConnections() {
 		console.log('NetworkHandler.cancelAllConnections');
-		this.isProcessing =  false;
+		this.isProcessing = false;
 
 		this.eventSources.forEach((eventSource) => {
 			if (eventSource && eventSource.readyState !== EventSource.CLOSED) {
@@ -44,18 +45,22 @@ class NetworkHandler {
 			this.updateMapHandler(text, 100);
 			return;
 		}
+		if (type == 'url') {
+			this.updateUrlHandler(text, 100);
+			return;
+		}
 		this.updateAnswerHandler(text, false);
 
 		if (this.lang == 'ja-JP' && resources.useZundamon) {
 			this.speechHandlerZundamon.speak(text, finish === "stop", this.lang);
-			this.speechHandlerZundamon.speechEndHandler = function(isStop) {
+			this.speechHandlerZundamon.speechEndHandler = function (isStop) {
 				this.isProcessing = !isStop;
 				this.speechEndHandler('', isStop);
 			}.bind(this);
 		}
 		else {
 			this.speechHandler.speak(text, finish === "stop", this.lang);
-			this.speechHandler.speechEndHandler = function(isStop) {
+			this.speechHandler.speechEndHandler = function (isStop) {
 				this.isProcessing = !isStop;
 				this.speechEndHandler('', isStop);
 			}.bind(this);

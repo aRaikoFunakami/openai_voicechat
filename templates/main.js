@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	networkHandler.updateAnswerHandler = updateAnswer;
 	networkHandler.speechEndHandler = updateAnswer;
 	networkHandler.updateMapHandler = updateMap;
+	networkHandler.updateUrlHandler = updateUrl;
 
 	const speechRecognitionHandler = new SpeechRecognitionHandler();
 	speechRecognitionHandler.initializeRecognition(); //あとでこれ呼ばなくても良いように変更する
@@ -64,14 +65,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		// src="https://maps.google.com/maps?output=embed&q=横浜らーめん 一本家&t=m&hl=ja&z=18"
 		mapElement.src = 'https://maps.google.com/maps?output=embed&q=' + encodeURI(text) + '&t=m&hl=ja&z=18';
-		
+
 		timeoutHandle_updateMap = setTimeout(function () {
 			mapElement.style.display = "none";
 		}, displayTime * 1000);
 	}
-	function hideMap(){
+	function hideMap() {
 		const mapElement = document.getElementById('map');
+		clearTimeout(timeoutHandle_updateMap); // 前回の非表示処理をキャンセル
+		if (mapElement.style.display == 'none')
+			return false;
 		mapElement.style.display = 'none';
+		return true;
+	}
+
+	let timeoutHandle_updateUrl = null;
+	function updateUrl(text, displayTime = 1) {
+		console.log(`update url: ${text}`);
+		const urlElement = document.getElementById('url');
+		urlElement.style.display = "block";
+		clearTimeout(timeoutHandle_updateUrl); // 前回の非表示処理をキャンセル
+		urlElement.src = encodeURI(text);
+		timeoutHandle_updateUrl = setTimeout(function () {
+			urlElement.style.display = "none";
+		}, displayTime * 1000);
+	}
+	function hideUrl() {
+		const urlElement = document.getElementById('url');
+		clearTimeout(timeoutHandle_updateUrl); // 前回の非表示処理をキャンセル
+		if (urlElement.style.display == 'none')
+			return false;
+		urlElement.style.display = 'none';
+		return true;
 	}
 
 	// answer area
@@ -107,7 +132,10 @@ document.addEventListener("DOMContentLoaded", function () {
 			// hideMap();
 			return;
 		}
-		hideMap();
+		// If map or pdf is displayed, only the cancellation process is performed.
+		if (hideMap() || hideUrl())
+			return;
+
 		speechRecognitionHandler.startProcessing(lang);
 	});
 
@@ -142,7 +170,9 @@ document.addEventListener("DOMContentLoaded", function () {
 				// hideMap();
 				return;
 			}
-			hideMap();
+			// If map or pdf is displayed, only the cancellation process is performed.
+			if (hideMap() || hideUrl())
+				return;
 			speechRecognitionHandler.startProcessing(lang);
 		}
 		else if (e.code === 'KeyE') {
@@ -163,7 +193,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			updateStatus('Language:' + lang, 2);
 		}
 	});
-
 	//
 	// Setting Dialog
 	//
