@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	networkHandler.speechEndHandler = updateAnswer;
 	networkHandler.updateMapHandler = updateMap;
 	networkHandler.updateUrlHandler = updateUrl;
+	networkHandler.externalUrlHandler = externalUrl;
 
 	const speechRecognitionHandler = new SpeechRecognitionHandler();
 	speechRecognitionHandler.initializeRecognition(); //あとでこれ呼ばなくても良いように変更する
@@ -97,6 +98,10 @@ document.addEventListener("DOMContentLoaded", function () {
 			return false;
 		urlElement.style.display = 'none';
 		return true;
+	}
+
+	function externalUrl(url) {
+		window.open(url, '_blank');
 	}
 
 	// answer area

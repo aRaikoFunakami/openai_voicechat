@@ -25,6 +25,7 @@ def load_config():
 def get_applemusic_info(keyword):
     logging.info("keyword %s", keyword)
     baseurl = "https://music.apple.com/jp/search?term="
+    # baseurl = "https://open.spotify.com/search/"
     url = baseurl + urllib.parse.quote(keyword)
     logging.info("url %s", url)
     return url

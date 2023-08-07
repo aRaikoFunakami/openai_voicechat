@@ -14,6 +14,7 @@ class NetworkHandler {
 		this.speechEndHandler = null;
 		this.updateMapHandler = null;
 		this.updateUrlHandler = null;
+		this.externalUrlHandler = null;
 	}
 
 	cancelAllConnections() {
@@ -47,6 +48,10 @@ class NetworkHandler {
 		}
 		if (type == 'url') {
 			this.updateUrlHandler(text, 100);
+			return;
+		}
+		if (type == 'external_url') {
+			this.externalUrlHandler(text, 100);
 			return;
 		}
 		this.updateAnswerHandler(text, false);

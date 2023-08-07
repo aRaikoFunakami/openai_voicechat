@@ -56,11 +56,11 @@ class ApplemusicInfo(BaseTool):
         applemusic_url = get_applemusic_info(keyword)
         try:
             logging.info(f"applemusic_url:{applemusic_url}")
-            notifyUrl(applemusic_url)
+            notifyExternalUrl(applemusic_url)
         except Exception as e:
             print("error:", e)
 
-        return f"Apple musicで{keyword}を再生するためのURL: {applemusic_url}"
+        return f"Apple musicアプリを起動して{keyword}を再生します"
 
     def _arun(self, ticker: str):
         raise NotImplementedError("not support async")
@@ -412,6 +412,13 @@ def notifyUrl(url):
     if g_callback is not None:
         logging.warning(url)
         res = {"response": url, "type": "url", "finish_reason": "false"}
+        g_callback(json.dumps(res))
+
+
+def notifyExternalUrl(url):
+    if g_callback is not None:
+        logging.warning(url)
+        res = {"response": url, "type": "external_url", "finish_reason": "false"}
         g_callback(json.dumps(res))
 
 
