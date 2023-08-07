@@ -34,6 +34,39 @@ def load_config():
 
 
 #
+# apple music
+#
+from openai_function_applemusic import get_applemusic_info
+from openai_function_applemusic import applemusic_function
+
+
+class ApplemusicInfoInput(BaseModel):
+    keyword: str = Field(keyword="keyword")
+
+
+class ApplemusicInfo(BaseTool):
+    name = "get_applemusic_info"
+    description = "This is useful when you want to play songs or search for songs to be played on apple music by keywords related to songs, such as singer's name or song title."
+    args_schema: Type[BaseModel] = ApplemusicInfoInput
+
+    def _run(self, keyword: str):
+        logging.info(f"get_applemusic_info({keyword})")
+        # notify("applemusic\n")
+
+        applemusic_url = get_applemusic_info(keyword)
+        try:
+            logging.info(f"applemusic_url:{applemusic_url}")
+            notifyUrl(applemusic_url)
+        except Exception as e:
+            print("error:", e)
+
+        return f"Apple musicで{keyword}を再生するためのURL: {applemusic_url}"
+
+    def _arun(self, ticker: str):
+        raise NotImplementedError("not support async")
+
+
+#
 # navi_destination
 #
 from openai_function_navi_destination import get_navi_destination_info
@@ -201,6 +234,7 @@ tools = [
     VieraInfo(),
     LexusInfo(),
     NaviDestinationInfo(),
+    ApplemusicInfo(),
 ]
 
 
@@ -427,13 +461,17 @@ def chat(input, callback=None):
 # test codes
 #
 
+queries = [
+    ["尾崎豊のI love youを聴きたい", "get_applemusic_info"],
+]
+
 queries1 = [
     ["今日の横浜の天気は？", "get_weather_info"],
     ["What is the weather like in Yokohama today?", "get_weather_info"],
     ["横滨今天的天气如何？", "get_weather_info"],
 ]
 
-queries = [
+queries4 = [
     ["横浜駅前の美味しいラーメン屋を3件教えて", "get_hotpepper_info"],
     ["イタリアンは？", "get_hotpepper_info"],
     ["中華は？", "get_hotpepper_info"],
@@ -480,7 +518,7 @@ def test_langchain_support():
 
 def main():
     logging.basicConfig(
-        level=logging.WARNING,
+        level=logging.INFO,
         format="%(asctime)s - %(filename)s:%(funcName)s[%(lineno)d] - %(message)s",
     )
     test_langchain_support()
