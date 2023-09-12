@@ -120,7 +120,7 @@ class WeatherInfo(BaseTool):
 
     def _run(self, latitude: int, longitude: int):
         logging.info(f"get_weather_info(latitude, longitude)")
-        notify("気象情報データを確認しています\n")
+        notify("Checking weather data.\n")
         return get_weather_info(latitude, longitude)
 
     def _arun(self, ticker: str):
@@ -212,13 +212,14 @@ class LexusInfo(BaseTool):
 class VieraInfo(BaseTool):
     name = "get_pdf_viera_info"
     description = """
-    	This is useful when you want to know instructions on how to operate Viera, a smart TV that can connect to the Internet.
+        This is useful when you want to know instructions on how to operate Viera, a smart TV that can connect to the Internet.
+        Search TV instruction manuals.Get how to operate Viera, a smart TV connected to the Internet.
     	Enter query.
     """
     args_schema: Type[BaseModel] = PDFInfoInput
 
     def _run(self, query: str):
-        notify("取扱説明書を確認しています\n")
+        notify("checking the instruction manual.\n")
         logging.info(f"get_pdf_viera_info(query)")
         response = get_pdf_viera_info(query)
         notifyUrl(response.get("urls")[0])
@@ -292,7 +293,7 @@ def OpenAIFunctionsAgent(tools=None, llm=None, verbose=False):
         AI must respond in 50 words or less whenever possible.
         AI must include their own suggestions in their responses.
         The AI will include witty and fun topics in its responses.
-        Whenever AI has reference information, it will add that information to the end of the sentence.
+        Whenever AI has reference information, it will add that information to the end of the sentence. 
         """
 
         prompt_language = """
@@ -433,16 +434,25 @@ def notifyMap(input):
         g_callback(json.dumps(res))
 
 
+def search_viera_manual(input, callback):
+    response = get_pdf_viera_info(input)
+    res = {"response": response.get("content"), "finish_reason": "stop"}
+    callback(json.dumps(res, ensure_ascii=False))
+    notifyUrl(response.get("urls")[0])
+    return response
+
+
 g_callback = None
 g_lang = None
 
 
-def chat(input, callback=None):
+def chat(input, callback=None, function=None):
     logging.info("chatstart")
     load_config()
 
     global g_callback, g_lang
     g_callback = callback
+    # Determine the language used
     g_lang = langid.classify(input)[0]
 
     callback_manager = CallbackManager([MyCustomCallbackHandler(callback)])
@@ -458,7 +468,12 @@ def chat(input, callback=None):
     input = input + " " + suffix
     logging.warning(input)
 
-    response = agent_chain.run(input=input)
+    response = ""
+    if function is None or function == "":
+        response = agent_chain.run(input=input)
+    elif function == "viera":
+        response = search_viera_manual(input=input, callback=callback)
+
     cprint(f"response: {response}")
     g_callback = None
     g_lang = None

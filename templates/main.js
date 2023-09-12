@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	speechRecognitionHandler.updateStatusHandler = updateStatus;
 
 	let lang = 'ja-JP';
+	let func = ""; // if you want to use the specific function instead of OpenAIFunctionsAgent
 
 	init_html();
 	// status display area (notification and debug)
@@ -84,10 +85,12 @@ document.addEventListener("DOMContentLoaded", function () {
 	function updateUrl(text, displayTime = 1) {
 		console.log(`update url: ${text}`);
 		const urlElement = document.getElementById('url');
+		//urlElement.src = 'about:blank';
 		urlElement.style.display = "block";
 		clearTimeout(timeoutHandle_updateUrl); // 前回の非表示処理をキャンセル
 		urlElement.src = encodeURI(text);
 		timeoutHandle_updateUrl = setTimeout(function () {
+			urlElement.src = 'about:blank';
 			urlElement.style.display = "none";
 		}, displayTime * 1000);
 	}
@@ -96,12 +99,14 @@ document.addEventListener("DOMContentLoaded", function () {
 		clearTimeout(timeoutHandle_updateUrl); // 前回の非表示処理をキャンセル
 		if (urlElement.style.display == 'none')
 			return false;
+		urlElement.src = 'about:blank';
 		urlElement.style.display = 'none';
 		return true;
 	}
 
 	function externalUrl(url) {
 		window.open(url, '_blank');
+		console.log(`externalUrl: ${url}`);
 	}
 
 	// answer area
@@ -159,6 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
 				videoElement.src = resources.videoUrls[videoIndex];
 				videoElement.currentTime = videoTimes[videoIndex];
 				videoElement.play();
+				videoElement.volume = 0.4;
 				currentVideoIndex = videoIndex;
 			}
 		}
@@ -196,6 +202,10 @@ document.addEventListener("DOMContentLoaded", function () {
 		else if (e.code === 'KeyK') {
 			lang = 'ko-KR';
 			updateStatus('Language:' + lang, 2);
+		}
+		else if (e.code === 'KeyV') {
+			func = 'viera';
+			updateStatus('Function:' + func, 2);
 		}
 	});
 	//
@@ -254,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	speechRecognitionHandler.recognizedHandler = function (text) {
 		console.log('speechRecognitionHandler.recognizedHandler ');
-		networkHandler.setupEventSource(text, lang);
+		networkHandler.setupEventSource(text, lang, func);
 	}
 
 });

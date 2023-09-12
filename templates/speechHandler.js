@@ -32,7 +32,7 @@ class SpeechHandler {
 	constructor() {
 		this.utterances = [];
 		this.text = "";
-		this.delimitersDefault = [',', '.', '!', ':', ';', '?', '{', '}', '[', ']', '！', '？', '：', '；', '　', '。', '、',];
+		this.delimitersDefault = ['\t', '\n', '!', ':', ';', '?', '{', '}', '[', ']', '！', '？', '：', '；', '　', '。', '、',];
 		this.delimitersJa = ['「', '」', '！', '？', '：', '；', '　', '。', '、',];
 		this.delimiters = this.delimitersDefault;
 
@@ -77,7 +77,7 @@ class SpeechHandler {
 			utterance.voice = voices[155];
 			utterance.rate = 1.0;
 			this.delimiters = this.delimitersDefault;
-		} else if (lang == 'ja-JP'){
+		} else if (lang == 'ja-JP') {
 			this.delimiters = this.delimitersJa;
 		}
 		this.utterances.push(utterance);
@@ -101,6 +101,7 @@ class SpeechHandler {
 			} else {
 				this.speakUtterance(firstPart, isStop, lang);
 			}
+			console.log(`speak this.speakUtterance firstPart:${firstPart}, restPart: ${restPart}, this.text = ${this.text}`);
 
 			// If there is data left to read, repeat again.
 			this.text = restPart;

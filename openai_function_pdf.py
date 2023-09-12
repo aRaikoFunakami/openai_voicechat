@@ -171,13 +171,15 @@ def get_pdf_viera_info(query, persist_directory="./chroma_viera"):
 
 pdf_viera_function = {
     "name": "get_pdf_viera_info",
-    "description": "インターネットに接続したスマートテレビであるビエラの操作方法を取得します",
+    # "description": "インターネットに接続したスマートテレビであるビエラの操作方法を取得します",
+    "description": "Search TV instruction manuals. Get how to operate Viera, a smart TV connected to the Internet",
     "parameters": {
         "type": "object",
         "properties": {
             "query": {
                 "type": "string",
-                "description": "インターネットに接続したスマートテレビであるビエラの操作方法についての質問",
+                # "description": "インターネットに接続したスマートテレビであるビエラの操作方法についての質問",
+                "description": "Questions about how to operate Viera, a smart TV connected to the Internet",
             },
         },
         "required": ["query"],
@@ -273,10 +275,10 @@ queries1 = [
 ]
 
 queries = [
-    ["カーナビのルートを設定したい", "get_pdf_lexus_info"],
+    # ["カーナビのルートを設定したい", "get_pdf_lexus_info"],
     #    ["What is the procedure for watching YouTube on a car navigation system?", "get_pdf_lexus_info"],
     #    ['ビエラでハイブリッドキャストの設定の仕方を教えて', "get_pdf_viera_info"],
-    #    ['How do I set up hybrid cast on my Viera?', "get_pdf_viera_info"],
+    ["How do I set up hybrid cast on my Viera?", "get_pdf_viera_info"],
 ]
 
 
